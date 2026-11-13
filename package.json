@@ -2,6 +2,7 @@
   "name": "lifeos",
   "private": true,
   "scripts": {
+    "setup": "pnpm install && pnpm --filter api db:generate",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^17.6.0"
+    "lint-staged": "^17.6.0",
+    "typescript": "6.0.3"
   }
 }
