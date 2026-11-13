@@ -18,6 +18,10 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
+  findById(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
   create(data: NewUser) {
     return this.prisma.user.create({ data });
   }
