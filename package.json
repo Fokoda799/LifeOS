@@ -10,9 +10,16 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\"",
     "db:up": "docker compose up -d db",
     "db:down": "docker compose down",
-    "db:logs": "docker compose logs -f db"
+    "db:logs": "docker compose logs -f db",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,css}\"",
+    "prepare": "husky"
   },
-  "engines": { "node": ">=20" },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md,css}": "prettier --write"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "packageManager": "pnpm@11.20.0",
   "devEngines": {
     "packageManager": {
@@ -20,6 +27,9 @@
       "version": "11.20.0",
       "onFail": "download"
     }
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0"
   }
 }
-
