@@ -2,8 +2,12 @@ packages:
   - "apps/*"
   - "packages/*"
 
+allowBuilds:
+  '@prisma/engines': false
+  esbuild: false
+  prisma: false
+
 # settings moved from apps/web (copy whatever your file contained)
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
-  
