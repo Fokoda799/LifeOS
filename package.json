@@ -1,7 +1,6 @@
 {
   "name": "lifeos",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -11,6 +10,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\""
   },
   "engines": { "node": ">=20" },
+  "packageManager": "pnpm@11.20.0",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",

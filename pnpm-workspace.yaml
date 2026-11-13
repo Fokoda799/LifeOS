@@ -1,3 +1,9 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - "apps/*"
+  - "packages/*"
+
+# settings moved from apps/web (copy whatever your file contained)
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+  
