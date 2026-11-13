@@ -5,15 +5,19 @@ import { validateEnv } from './config/env.js';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { HealthController } from './health.controller.js';
+import { UsersModule } from './users/users.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
-    PrismaModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
       validate: validateEnv,
     }),
+    PrismaModule,
+    UsersModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
