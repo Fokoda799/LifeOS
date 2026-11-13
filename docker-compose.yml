@@ -1,0 +1,21 @@
+services:
+  db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: lifeos-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lifeos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lifeos_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-lifeos}
+    ports:
+      - "5431:5431"
+    volumes:
+      - lifeos_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lifeos_pgdata:
