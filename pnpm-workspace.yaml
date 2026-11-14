@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   '@prisma/engines': false
+  '@scarf/scarf': false
   argon2: false
   esbuild: false
   prisma: false
@@ -18,3 +19,4 @@ onlyBuiltDependencies:
   - argon2
   - esbuild
   - prisma
+  - scarf/scarf

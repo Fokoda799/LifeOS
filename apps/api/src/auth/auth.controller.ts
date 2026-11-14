@@ -9,14 +9,26 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  ApiBearerAuth,
+  ApiCookieAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  authResultSchema,
   loginSchema,
+  refreshBodySchema,
   registerSchema,
+  userSchema,
   type LoginInput,
   type RegisterInput,
 } from '@lifeos/shared';
 import type { Request, Response } from 'express';
 import type { Env } from '../config/env';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
+import { ApiErrors, ZodBody, ZodResponse } from '../common/openapi';
 import { AuthService } from './auth.service';
 import type { ClientMeta, Tokens } from './auth.types';
 import { CurrentUser } from './current-user.decorator';
@@ -31,6 +43,16 @@ const metaOf = (req: Request): ClientMeta => ({
   ip: req.ip,
 });
 
+const ClientHeader = () =>
+  ApiHeader({
+    name: 'x-client',
+    required: false,
+    enum: ['mobile'],
+    description:
+      "Send 'mobile' to receive tokens in the response body instead of cookies",
+  });
+
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -70,6 +92,11 @@ export class AuthController {
 
   @Public()
   @Post('register')
+  @ApiOperation({ summary: 'Create an account and sign in' })
+  @ClientHeader()
+  @ZodBody(registerSchema)
+  @ZodResponse(201, authResultSchema, 'Account created')
+  @ApiErrors(400, 409)
   async register(
     @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
     @Req() req: Request,
@@ -81,6 +108,11 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(200)
+  @ApiOperation({ summary: 'Sign in with email and password' })
+  @ClientHeader()
+  @ZodBody(loginSchema)
+  @ZodResponse(200, authResultSchema, 'Signed in')
+  @ApiErrors(400, 401)
   async login(
     @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,
     @Req() req: Request,
@@ -92,6 +124,13 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Rotate the refresh token and get a new access token',
+  })
+  @ClientHeader()
+  @ZodBody(refreshBodySchema)
+  @ZodResponse(200, authResultSchema, 'New tokens issued')
+  @ApiErrors(401)
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -108,6 +147,9 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(204)
+  @ApiOperation({ summary: 'Revoke the refresh token and clear cookies' })
+  @ZodBody(refreshBodySchema)
+  @ApiResponse({ status: 204, description: 'Signed out' })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const fromBody = (req.body as { refreshToken?: unknown } | undefined)
       ?.refreshToken;
@@ -118,6 +160,11 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiOperation({ summary: 'Get the signed-in user' })
+  @ApiBearerAuth()
+  @ApiCookieAuth(ACCESS_COOKIE)
+  @ZodResponse(200, userSchema)
+  @ApiErrors(401)
   me(@CurrentUser() user: { id: string }) {
     return this.auth.me(user.id);
   }

@@ -13,7 +13,8 @@
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f db",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,css}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "openapi:export": "curl -fsS http://localhost:4000/docs-json -o apps/api/openapi.json"
   },
   "lint-staged": {
     "*.{ts,tsx,js,json,md,css}": "prettier --write"
@@ -21,7 +22,7 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@11.20.0",
+  "packageManager": "pnpm@11.20.0+sha512.9a6f330a95b66446ea088faf1521405a8a01f07fde7124cc9958dfed52d4bb436737e65b08f85f37b46fcba375092558ac51262b816844b22f63406ed166bfee",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",

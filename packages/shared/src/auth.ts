@@ -24,3 +24,23 @@ export const userSchema = z.object({
   currency: currencySchema,
 });
 export type User = z.infer<typeof userSchema>;
+
+export const authResultSchema = z.object({
+  user: userSchema,
+  accessToken: z
+    .string()
+    .optional()
+    .describe("Only returned when the x-client: mobile header is sent"),
+  refreshToken: z
+    .string()
+    .optional()
+    .describe("Only returned when the x-client: mobile header is sent"),
+});
+export type AuthResult = z.infer<typeof authResultSchema>;
+
+export const refreshBodySchema = z.object({
+  refreshToken: z
+    .string()
+    .optional()
+    .describe("Mobile clients send it here. Web clients use the refresh_token cookie."),
+});
