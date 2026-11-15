@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Dark is the default theme. */
+:root {
+  color-scheme: dark;
+  --background: #0b0f14;
+  --foreground: #e6eaf0;
+  --card: #121821;
+  --card-foreground: #e6eaf0;
+  --popover: #121821;
+  --popover-foreground: #e6eaf0;
+  --muted: #19212c;
+  --muted-foreground: #8b97a8;
+  --secondary: #19212c;
+  --secondary-foreground: #e6eaf0;
+  --accent: #19212c;
+  --accent-foreground: #e6eaf0;
+  --border: #263041;
+  --input: #5a677c;
+  --ring: #2dd4a7;
+  --primary: #2dd4a7;
+  --primary-foreground: #0b0f14;
+  --destructive: #f87171;
+  --destructive-foreground: #0b0f14;
+
+  --income: #34d399;
+  --expense: #f87171;
+  --warning: #fbbf24;
+  --info: #60a5fa;
+  --tasks: #a78bfa;
+  --tasks-foreground: #0b0f14;
+  --training: #f59e0b;
+  --training-foreground: #0b0f14;
+
+  --chart-1: #2dd4a7;
+  --chart-2: #60a5fa;
+  --chart-3: #a78bfa;
+  --chart-4: #f59e0b;
+  --chart-5: #f472b6;
+
+  --radius: 0.75rem;
+}
+
+.light {
+  color-scheme: light;
+  --background: #f5f7fa;
+  --foreground: #0f1720;
+  --card: #ffffff;
+  --card-foreground: #0f1720;
+  --popover: #ffffff;
+  --popover-foreground: #0f1720;
+  --muted: #eef2f6;
+  --muted-foreground: #5b6776;
+  --secondary: #eef2f6;
+  --secondary-foreground: #0f1720;
+  --accent: #eef2f6;
+  --accent-foreground: #0f1720;
+  --border: #dde3ea;
+  --input: #7f8ca0;
+  --ring: #0a7f64;
+  --primary: #0a7f64;
+  --primary-foreground: #ffffff;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+
+  --income: #047857;
+  --expense: #b91c1c;
+  --warning: #b45309;
+  --info: #1d4ed8;
+  --tasks: #6d28d9;
+  --tasks-foreground: #ffffff;
+  --training: #d97706;
+  --training-foreground: #0f1720;
+
+  --chart-1: #0a7f64;
+  --chart-2: #2563eb;
+  --chart-3: #6d28d9;
+  --chart-4: #d97706;
+  --chart-5: #db2777;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-tasks: var(--tasks);
+  --color-tasks-foreground: var(--tasks-foreground);
+  --color-training: var(--training);
+  --color-training-foreground: var(--training-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Inter covers Latin; IBM Plex Sans Arabic takes over for Arabic glyphs. */
+  --font-sans: var(--font-inter), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  /* Tailwind v4 defaults borders to currentColor; use our token instead. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+}
