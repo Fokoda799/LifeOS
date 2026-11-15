@@ -10,6 +10,7 @@ coverage
 .DS_Store
 apps/api/src/generated
 
+
 # AI tool helper files added by the Prisma CLI
 apps/api/.agents
 apps/api/.claude
