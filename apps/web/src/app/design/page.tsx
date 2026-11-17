@@ -1,4 +1,5 @@
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ComponentsDemo } from "./components-demo";
 
 // Class names are written out in full so Tailwind can detect them.
 const swatches = [
@@ -70,6 +71,8 @@ export default function DesignPage() {
           className="rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </section>
+
+      <ComponentsDemo />
     </main>
   );
 }
