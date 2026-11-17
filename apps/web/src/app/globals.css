@@ -4,8 +4,63 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Dark is the default theme. */
+/* Light is the default theme. next-themes adds .dark for the dark theme. */
 :root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #1f2937;
+  --card: #ffffff;
+  --card-foreground: #1f2937;
+  --popover: #ffffff;
+  --popover-foreground: #1f2937;
+  --muted: #f3f5f9;
+  --muted-foreground: #5b6776;
+  --secondary: #f3f5f9;
+  --secondary-foreground: #1f2937;
+  --accent: #f3f5f9;
+  --accent-foreground: #1f2937;
+  --border: #e2e6ee;
+  --input: #7f8ca0;
+
+  /* Platform and tool accents: fill, text-on-fill, and a darker "edge" for button lips. */
+  --platform: #7c3aed;
+  --platform-foreground: #ffffff;
+  --platform-edge: #5b21b6;
+  --money: #0a7f64;
+  --money-foreground: #ffffff;
+  --money-edge: #065f4b;
+  --tasks: #2563eb;
+  --tasks-foreground: #ffffff;
+  --tasks-edge: #1e40af;
+  --training: #c2410c;
+  --training-foreground: #ffffff;
+  --training-edge: #7c2d12;
+
+  /* Default accent is the platform. A [data-tool] wrapper overrides these four. */
+  --primary: var(--platform);
+  --primary-foreground: var(--platform-foreground);
+  --primary-edge: var(--platform-edge);
+  --ring: var(--platform);
+
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --destructive-edge: #7f1d1d;
+
+  --income: #047857;
+  --expense: #b91c1c;
+  --warning: #b45309;
+  --info: #475569;
+
+  --chart-1: #7c3aed;
+  --chart-2: #0a7f64;
+  --chart-3: #2563eb;
+  --chart-4: #c2410c;
+  --chart-5: #db2777;
+
+  --radius: 0.875rem;
+}
+
+.dark {
   color-scheme: dark;
   --background: #0b0f14;
   --foreground: #e6eaf0;
@@ -21,66 +76,54 @@
   --accent-foreground: #e6eaf0;
   --border: #263041;
   --input: #5a677c;
-  --ring: #2dd4a7;
-  --primary: #2dd4a7;
-  --primary-foreground: #0b0f14;
+
+  --platform: #a78bfa;
+  --platform-foreground: #0b0f14;
+  --platform-edge: #7c5bd1;
+  --money: #2dd4a7;
+  --money-foreground: #0b0f14;
+  --money-edge: #1aa37f;
+  --tasks: #60a5fa;
+  --tasks-foreground: #0b0f14;
+  --tasks-edge: #2f6fd4;
+  --training: #fb923c;
+  --training-foreground: #0b0f14;
+  --training-edge: #d26a14;
+
   --destructive: #f87171;
   --destructive-foreground: #0b0f14;
+  --destructive-edge: #c24848;
 
   --income: #34d399;
   --expense: #f87171;
   --warning: #fbbf24;
-  --info: #60a5fa;
-  --tasks: #a78bfa;
-  --tasks-foreground: #0b0f14;
-  --training: #f59e0b;
-  --training-foreground: #0b0f14;
+  --info: #94a3b8;
 
-  --chart-1: #2dd4a7;
-  --chart-2: #60a5fa;
-  --chart-3: #a78bfa;
-  --chart-4: #f59e0b;
+  --chart-1: #a78bfa;
+  --chart-2: #2dd4a7;
+  --chart-3: #60a5fa;
+  --chart-4: #fb923c;
   --chart-5: #f472b6;
-
-  --radius: 0.75rem;
 }
 
-.light {
-  color-scheme: light;
-  --background: #f5f7fa;
-  --foreground: #0f1720;
-  --card: #ffffff;
-  --card-foreground: #0f1720;
-  --popover: #ffffff;
-  --popover-foreground: #0f1720;
-  --muted: #eef2f6;
-  --muted-foreground: #5b6776;
-  --secondary: #eef2f6;
-  --secondary-foreground: #0f1720;
-  --accent: #eef2f6;
-  --accent-foreground: #0f1720;
-  --border: #dde3ea;
-  --input: #7f8ca0;
-  --ring: #0a7f64;
-  --primary: #0a7f64;
-  --primary-foreground: #ffffff;
-  --destructive: #b91c1c;
-  --destructive-foreground: #ffffff;
-
-  --income: #047857;
-  --expense: #b91c1c;
-  --warning: #b45309;
-  --info: #1d4ed8;
-  --tasks: #6d28d9;
-  --tasks-foreground: #ffffff;
-  --training: #d97706;
-  --training-foreground: #0f1720;
-
-  --chart-1: #0a7f64;
-  --chart-2: #2563eb;
-  --chart-3: #6d28d9;
-  --chart-4: #d97706;
-  --chart-5: #db2777;
+/* Put data-tool on a wrapper (not <html>). It must stay after :root and .dark. */
+[data-tool="money"] {
+  --primary: var(--money);
+  --primary-foreground: var(--money-foreground);
+  --primary-edge: var(--money-edge);
+  --ring: var(--money);
+}
+[data-tool="tasks"] {
+  --primary: var(--tasks);
+  --primary-foreground: var(--tasks-foreground);
+  --primary-edge: var(--tasks-edge);
+  --ring: var(--tasks);
+}
+[data-tool="training"] {
+  --primary: var(--training);
+  --primary-foreground: var(--training-foreground);
+  --primary-edge: var(--training-edge);
+  --ring: var(--training);
 }
 
 @theme inline {
@@ -103,14 +146,21 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-income: var(--income);
-  --color-expense: var(--expense);
-  --color-warning: var(--warning);
-  --color-info: var(--info);
+
+  --color-platform: var(--platform);
+  --color-platform-foreground: var(--platform-foreground);
+  --color-money: var(--money);
+  --color-money-foreground: var(--money-foreground);
   --color-tasks: var(--tasks);
   --color-tasks-foreground: var(--tasks-foreground);
   --color-training: var(--training);
   --color-training-foreground: var(--training-foreground);
+
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -122,12 +172,12 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Inter covers Latin; IBM Plex Sans Arabic takes over for Arabic glyphs. */
-  --font-sans: var(--font-inter), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
+  /* Nunito for Latin (its digits are all the same width, so amounts align);
+     Baloo Bhaijaan 2 takes over for Arabic glyphs. */
+  --font-sans: var(--font-nunito), var(--font-arabic), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
-  /* Tailwind v4 defaults borders to currentColor; use our token instead. */
   *,
   ::before,
   ::after {
@@ -137,5 +187,10 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
   }
 }

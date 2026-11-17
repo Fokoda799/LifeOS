@@ -1,5 +1,6 @@
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ComponentsDemo } from "./components-demo";
+import { ToolAccents } from "./tool-accents";
 
 // Class names are written out in full so Tailwind can detect them.
 const swatches = [
@@ -13,6 +14,8 @@ const swatches = [
   ["info", "bg-info"],
   ["tasks", "bg-tasks"],
   ["training", "bg-training"],
+  ["platform", "bg-platform"],
+  ["money", "bg-money"],
 ] as const;
 
 export default function DesignPage() {
@@ -53,26 +56,8 @@ export default function DesignPage() {
         </div>
       </section>
 
-      <section className="flex flex-wrap items-center gap-3">
-        <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          Money
-        </button>
-        <button className="rounded-lg bg-tasks px-4 py-2 text-sm font-medium text-tasks-foreground">
-          Tasks
-        </button>
-        <button className="rounded-lg bg-training px-4 py-2 text-sm font-medium text-training-foreground">
-          Training
-        </button>
-        <button className="rounded-lg border bg-secondary px-4 py-2 text-sm text-secondary-foreground">
-          Secondary
-        </button>
-        <input
-          placeholder="Enter amount"
-          className="rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </section>
-
       <ComponentsDemo />
+      <ToolAccents />
     </main>
   );
 }

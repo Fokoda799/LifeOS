@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
+import { Baloo_Bhaijaan_2, Nunito } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const inter = Inter({
+const nunito = Nunito({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-inter",
+  variable: "--font-nunito",
   display: "swap",
 });
 
-const arabic = IBM_Plex_Sans_Arabic({
+const arabic = Baloo_Bhaijaan_2({
   subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-arabic",
   display: "swap",
 });
@@ -25,9 +24,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     // lang and dir become dynamic when i18n arrives (P1-08, P1-09).
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${arabic.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${nunito.variable} ${arabic.variable}`}>
       <body className="min-h-dvh bg-background text-foreground antialiased">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
           <Toaster />
         </ThemeProvider>
