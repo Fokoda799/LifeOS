@@ -3,8 +3,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { PreferencesForm } from "@/features/settings/preferences-form";
 import { ProfileForm } from "@/features/settings/profile-form";
 import { SettingsSection } from "@/features/settings/settings-section";
-import { UpdateProfileInput } from "@lifeos/shared";
-import { useUpdateProfile } from "@/features/settings/use-update-profile";
 
 import { toast } from "sonner";
 export default function SettingsPage() {
