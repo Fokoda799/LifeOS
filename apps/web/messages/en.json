@@ -15,5 +15,52 @@
   },
   "Language": {
     "label": "Language"
+  },
+  "Common": { "loading": "Loading…", "retry": "Try again" },
+  "Auth": {
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "signOut": "Sign out",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to continue to LifeOS.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "One account for all your tools.",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name (optional)",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "submitting": "Please wait…",
+    "errors": {
+      "invalidCredentials": "Wrong email or password.",
+      "emailTaken": "This email is already registered.",
+      "network": "Can't reach the server. Try again.",
+      "generic": "Something went wrong. Try again."
+    }
+  },
+  "Validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email address",
+    "passwordMin": "At least 8 characters",
+    "tooLong": "Too long",
+    "invalid": "Invalid value"
+  },
+  "Dashboard": { "welcome": "Welcome, {name}" },
+  "Tools": {
+    "label": "Featured tools",
+    "heading": "One account, every tool",
+    "soon": "Soon",
+    "pause": "Pause slideshow",
+    "play": "Play slideshow",
+    "money": { "name": "Money", "tagline": "Know where every dirham goes." },
+    "tasks": { "name": "Tasks", "tagline": "Plan your day and finish what matters." },
+    "training": { "name": "Training", "tagline": "Build streaks that keep you moving." },
+    "preview": {
+      "balance": "Balance",
+      "task1": "Plan the week",
+      "task2": "Review the budget",
+      "task3": "Evening walk",
+      "streak": "{count}-day streak"
+    }
   }
 }

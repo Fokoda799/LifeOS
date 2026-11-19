@@ -78,6 +78,7 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - Planned stack: React Hook Form + Zod, TanStack Query, Recharts.
 - RTL: direction comes from `DirectionProvider` in the locale layout. Icons that point a direction (chevrons, arrows, "back") get `rtl:rotate-180` (or `rtl:-scale-x-100`). Never use `space-x-*`, use `gap-*`.
 - Money amounts (sign + currency + number) render inside `<bdi dir="ltr">` so signs and currency never reorder in RTL. User-written text (task titles, notes, names) gets `dir="auto"`.
+- Tools are defined once in `features/tools/registry.ts` (login showcase, later the sidebar switcher). New tool = registry entry + `[data-tool="<id>"]` block in `globals.css` + messages `Tools.<id>.*` + a preview in `previews.tsx`.
 
 ## Working style
 

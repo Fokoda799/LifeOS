@@ -15,5 +15,52 @@
   },
   "Language": {
     "label": "Langue"
+  },
+  "Common": { "loading": "Chargement…", "retry": "Réessayer" },
+  "Auth": {
+    "signIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "signOut": "Se déconnecter",
+    "loginTitle": "Content de vous revoir",
+    "loginSubtitle": "Connectez-vous pour continuer vers LifeOS.",
+    "registerTitle": "Créez votre compte",
+    "registerSubtitle": "Un seul compte pour tous vos outils.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "name": "Nom (facultatif)",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "submitting": "Veuillez patienter…",
+    "errors": {
+      "invalidCredentials": "E-mail ou mot de passe incorrect.",
+      "emailTaken": "Cet e-mail est déjà utilisé.",
+      "network": "Impossible de joindre le serveur. Réessayez.",
+      "generic": "Une erreur est survenue. Réessayez."
+    }
+  },
+  "Validation": {
+    "required": "Ce champ est obligatoire",
+    "email": "Saisissez une adresse e-mail valide",
+    "passwordMin": "8 caractères minimum",
+    "tooLong": "Trop long",
+    "invalid": "Valeur invalide"
+  },
+  "Dashboard": { "welcome": "Bienvenue, {name}" },
+  "Tools": {
+    "label": "Outils à la une",
+    "heading": "Un compte, tous vos outils",
+    "soon": "Bientôt",
+    "pause": "Mettre le diaporama en pause",
+    "play": "Lancer le diaporama",
+    "money": { "name": "Argent", "tagline": "Sachez où va chaque dirham." },
+    "tasks": { "name": "Tâches", "tagline": "Planifiez votre journée et finissez l'essentiel." },
+    "training": { "name": "Entraînement", "tagline": "Créez des séries qui vous font avancer." },
+    "preview": {
+      "balance": "Solde",
+      "task1": "Planifier la semaine",
+      "task2": "Revoir le budget",
+      "task3": "Marche du soir",
+      "streak": "Série de {count} jours"
+    }
   }
 }
