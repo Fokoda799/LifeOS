@@ -26,6 +26,19 @@ export class UsersService {
     return this.prisma.user.create({ data });
   }
 
+  update(
+    id: string,
+    data: {
+      name?: string | null;
+      locale?: string;
+      currency?: string;
+      them?: string;
+    },
+  ) {
+    // Always scoped to the authenticated user's own id.
+    return this.prisma.user.update({ where: { id }, data });
+  }
+
   /** Strips the password hash and validates the shape sent to clients. */
   toPublic(user: {
     id: string;

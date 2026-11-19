@@ -12,7 +12,11 @@ export const NAMES: Record<(typeof routing.locales)[number], string> = {
   ar: "العربية",
 };
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({
+  onChange,
+}: {
+  onChange?: (locale: (typeof routing.locales)[number]) => void;
+}) {
   const t = useTranslations("Language");
   const locale = useLocale();
   const router = useRouter();
@@ -29,7 +33,10 @@ export function LanguageSwitcher() {
           lang={l}
           size="sm"
           variant={l === locale ? "default" : "outline"}
-          onClick={() => router.replace(pathname, { locale: l })}
+          onClick={() => {
+            onChange?.(l);
+            router.replace(pathname, { locale: l });
+          }}
         >
           {NAMES[l]}
         </Button>

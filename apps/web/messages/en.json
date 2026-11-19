@@ -87,7 +87,26 @@
     "preferences": "Preferences",
     "account": "Account",
     "comingSoonText": "This part of LifeOS is being built. Check back soon.",
+    "notifications": "Notifications",
+    "notificationsDescription": "Your recent updates and alerts.",
+    "noNotifications": "You're all caught up.",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar"
+  },
+  "Settings": {
+    "title": "Settings",
+    "profileTitle": "Profile",
+    "profileDescription": "How you appear in LifeOS.",
+    "name": "Name",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Couldn't save. Try again.",
+    "preferencesTitle": "Preferences",
+    "preferencesDescription": "Your language and default currency.",
+    "currency": "Default currency",
+    "currencyHint": "Used for new accounts. Existing accounts keep their own currency.",
+    "appearanceTitle": "Appearance",
+    "appearanceDescription": "Choose how LifeOS looks on this device."
   }
 }

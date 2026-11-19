@@ -45,7 +45,9 @@ export function LoginForm() {
         noValidate
         className="grid gap-4"
         onSubmit={handleSubmit((values) =>
-          login.mutate(values, { onSuccess: () => router.replace("/dashboard") }),
+          login.mutate(values, {
+            onSuccess: (res) => router.replace("/dashboard", { locale: res.user.locale }),
+          }),
         )}
       >
         <FormField

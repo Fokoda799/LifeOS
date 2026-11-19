@@ -25,7 +25,7 @@ export type NavItem = { key: NavKey; href: string; icon: LucideIcon; enabled: bo
 
 export const platformNav: readonly NavItem[] = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, enabled: true },
-  { key: "settings", href: "/settings", icon: Settings, enabled: false }, // P1-12
+  { key: "settings", href: "/settings", icon: Settings, enabled: true },
 ];
 
 // Flip `enabled` to true when the page ships.

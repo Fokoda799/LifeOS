@@ -29,12 +29,32 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--success-bg": "color-mix(in srgb, var(--income) 12%, var(--popover))",
+          "--success-border": "var(--income)",
+          "--success-text": "var(--income)",
+          "--error-bg": "color-mix(in srgb, var(--destructive) 12%, var(--popover))",
+          "--error-border": "var(--destructive)",
+          "--error-text": "var(--destructive)",
+          "--warning-bg": "color-mix(in srgb, var(--warning) 12%, var(--popover))",
+          "--warning-border": "var(--warning)",
+          "--warning-text": "var(--warning)",
+          "--info-bg": "color-mix(in srgb, var(--info) 12%, var(--popover))",
+          "--info-border": "var(--info)",
+          "--info-text": "var(--info)",
+          "--loading-bg": "var(--popover)",
+          "--loading-border": "var(--primary)",
+          "--loading-text": "var(--primary)",
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "cn-toast border-2 shadow-none",
+          success: "!border-[var(--success-border)]",
+          error: "!border-[var(--error-border)]",
+          warning: "!border-[var(--warning-border)]",
+          info: "!border-[var(--info-border)]",
+          loading: "!border-[var(--loading-border)]",
         },
       }}
       {...props}

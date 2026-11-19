@@ -87,7 +87,26 @@
     "preferences": "التفضيلات",
     "account": "الحساب",
     "comingSoonText": "هذا الجزء من LifeOS قيد الإنشاء. عد قريبًا.",
+    "notifications": "الإشعارات",
+    "notificationsDescription": "آخر التحديثات والتنبيهات الخاصة بك.",
+    "noNotifications": "لا توجد إشعارات جديدة.",
     "collapseSidebar": "طيّ الشريط الجانبي",
     "expandSidebar": "توسيع الشريط الجانبي"
+  },
+  "Settings": {
+    "title": "الإعدادات",
+    "profileTitle": "الملف الشخصي",
+    "profileDescription": "كيف تظهر في LifeOS.",
+    "name": "الاسم",
+    "save": "حفظ التغييرات",
+    "saving": "جارٍ الحفظ…",
+    "saved": "تم الحفظ",
+    "saveError": "تعذّر الحفظ. حاول مرة أخرى.",
+    "preferencesTitle": "التفضيلات",
+    "preferencesDescription": "لغتك وعملتك الافتراضية.",
+    "currency": "العملة الافتراضية",
+    "currencyHint": "تُستخدم للحسابات الجديدة. تحتفظ الحسابات الحالية بعملتها الخاصة.",
+    "appearanceTitle": "المظهر",
+    "appearanceDescription": "اختر شكل LifeOS على هذا الجهاز."
   }
 }

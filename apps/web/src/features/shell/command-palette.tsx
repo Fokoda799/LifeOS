@@ -17,6 +17,9 @@ import type { ToolId } from "@/features/tools/registry";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { platformNav, toolNav, type NavItem } from "./navigation";
+import { UpdateProfileInput } from "@lifeos/shared";
+import { toast } from "sonner";
+import { useUpdateProfile } from "../settings/use-update-profile";
 
 const themeIcons = { light: Sun, dark: Moon, system: Monitor } as const;
 
@@ -41,6 +44,12 @@ export function CommandPalette({
   function run(action: () => void) {
     onOpenChange(false);
     action();
+  }
+
+  const update = useUpdateProfile();
+
+  function save(input: UpdateProfileInput) {
+    update.mutate(input);
   }
 
   const destinations = [
@@ -99,7 +108,10 @@ export function CommandPalette({
             <CommandItem
               key={l}
               value={`${tLang("label")} ${NAMES[l]}`}
-              onSelect={() => run(() => router.replace(pathname, { locale: l as Locale }))}
+              onSelect={() => {
+                run(() => router.replace(pathname, { locale: l as Locale }));
+                save;
+              }}
             >
               {tLang("label")}: {NAMES[l]}
             </CommandItem>

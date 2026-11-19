@@ -38,26 +38,55 @@ export function SidebarContent({
   const toggleLabel = collapsed ? ts("expandSidebar") : ts("collapseSidebar");
   const ToggleIcon = collapsed ? PanelLeftOpen : PanelLeftClose;
 
-  return (
-    <div className="flex h-full flex-col gap-6">
-      {collapsed ? (
+  const logoHeader =
+    collapsed && onToggleCollapsed ? (
+      <button
+        type="button"
+        onClick={onToggleCollapsed}
+        aria-expanded="false"
+        aria-label={toggleLabel}
+        title={toggleLabel}
+        className="group relative mx-auto grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground"
+      >
+        <span
+          className="text-xl font-extrabold transition-opacity group-hover:opacity-0"
+          aria-hidden
+        >
+          L
+        </span>
+        <ToggleIcon
+          aria-hidden
+          className="absolute size-5 opacity-0 transition-opacity group-hover:opacity-100 rtl:-scale-x-100"
+        />
+      </button>
+    ) : (
+      <div className="flex items-center justify-between gap-2">
         <Link
           href="/dashboard"
           onClick={onNavigate}
           aria-label="LifeOS"
-          className="mx-auto grid size-10 place-items-center rounded-xl bg-primary text-xl font-extrabold text-primary-foreground"
-        >
-          L
-        </Link>
-      ) : (
-        <Link
-          href="/dashboard"
-          onClick={onNavigate}
           className="px-2 text-2xl font-extrabold text-primary"
         >
           LifeOS
         </Link>
-      )}
+        {onToggleCollapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            aria-expanded="true"
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            className="grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <ToggleIcon aria-hidden className="size-5 rtl:-scale-x-100" />
+          </button>
+        )}
+      </div>
+    );
+
+  return (
+    <div className="flex h-full flex-col gap-6">
+      {logoHeader}
 
       <ToolSwitcher activeTool={activeTool} collapsed={collapsed} />
 
@@ -114,23 +143,6 @@ export function SidebarContent({
       </nav>
 
       <div className="mt-auto grid gap-2">
-        {onToggleCollapsed && (
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            aria-expanded={!collapsed}
-            aria-label={toggleLabel}
-            title={collapsed ? toggleLabel : undefined}
-            className={cn(
-              base,
-              collapsed && "justify-center px-0",
-              "w-full border-transparent text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-            )}
-          >
-            <ToggleIcon aria-hidden className="size-5 shrink-0 rtl:-scale-x-100" />
-            {!collapsed && toggleLabel}
-          </button>
-        )}
         <div className="border-t-2 border-border pt-2">
           <UserMenu collapsed={collapsed} />
         </div>

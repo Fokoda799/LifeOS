@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div
       data-tool={activeTool ?? undefined}
       className={cn(
-        "min-h-dvh bg-background lg:grid lg:transition-[grid-template-columns] lg:duration-200 motion-reduce:transition-none",
+        "h-dvh overflow-hidden bg-background lg:grid lg:transition-[grid-template-columns] lg:duration-200 motion-reduce:transition-none",
         collapsed ? "lg:grid-cols-[4.5rem_minmax(0,1fr)]" : "lg:grid-cols-[17rem_minmax(0,1fr)]",
       )}
     >
@@ -68,9 +68,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onToggleCollapsed={toggleCollapsed}
         />
       </aside>
-      <div className="flex min-w-0 flex-col">
+      <div className="flex h-dvh min-w-0 flex-col">
         <Topbar activeTool={activeTool} onOpenPalette={() => setPaletteOpen(true)} />
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar lg:p-8">
+          {children}
+        </main>
       </div>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
