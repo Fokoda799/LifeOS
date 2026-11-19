@@ -42,8 +42,12 @@ export default function DesignPage() {
             28,450.75 <span className="text-lg text-muted-foreground">MAD</span>
           </p>
           <div className="mt-4 flex gap-6 text-sm tabular-nums">
-            <span className="text-income">+8,650.00</span>
-            <span className="text-expense">−6,230.45</span>
+            <bdi dir="ltr" className="text-income">
+              +8,650.00
+            </bdi>
+            <bdi dir="ltr" className="text-expense">
+              −6,230.45
+            </bdi>
           </div>
         </div>
 

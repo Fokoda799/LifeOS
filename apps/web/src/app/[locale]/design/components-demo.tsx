@@ -114,7 +114,7 @@ export function ComponentsDemo() {
                   <TableCell
                     className={`text-end tabular-nums ${r.amount < 0 ? "text-expense" : "text-income"}`}
                   >
-                    {amount.format(r.amount)} MAD
+                    <bdi dir="ltr"> {amount.format(r.amount)} MAD</bdi>
                   </TableCell>
                 </TableRow>
               ))}

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Baloo_Bhaijaan_2, Nunito } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
 import { isRtl, routing } from "@/i18n/routing";
 import "./globals.css";
 
@@ -39,7 +38,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           {children}
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

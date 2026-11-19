@@ -76,6 +76,8 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - Fonts: Nunito (Latin) with Baloo Bhaijaan 2 (Arabic). Money uses `tabular-nums`.
 - UI components are shadcn/ui (Radix) in `apps/web/src/components/ui`.
 - Planned stack: React Hook Form + Zod, TanStack Query, Recharts.
+- RTL: direction comes from `DirectionProvider` in the locale layout. Icons that point a direction (chevrons, arrows, "back") get `rtl:rotate-180` (or `rtl:-scale-x-100`). Never use `space-x-*`, use `gap-*`.
+- Money amounts (sign + currency + number) render inside `<bdi dir="ltr">` so signs and currency never reorder in RTL. User-written text (task titles, notes, names) gets `dir="auto"`.
 
 ## Working style
 
