@@ -86,6 +86,8 @@
     "goTo": "الانتقال إلى",
     "preferences": "التفضيلات",
     "account": "الحساب",
-    "comingSoonText": "هذا الجزء من LifeOS قيد الإنشاء. عد قريبًا."
+    "comingSoonText": "هذا الجزء من LifeOS قيد الإنشاء. عد قريبًا.",
+    "collapseSidebar": "طيّ الشريط الجانبي",
+    "expandSidebar": "توسيع الشريط الجانبي"
   }
 }

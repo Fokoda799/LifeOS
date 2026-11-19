@@ -86,6 +86,8 @@
     "goTo": "Go to",
     "preferences": "Preferences",
     "account": "Account",
-    "comingSoonText": "This part of LifeOS is being built. Check back soon."
+    "comingSoonText": "This part of LifeOS is being built. Check back soon.",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   }
 }

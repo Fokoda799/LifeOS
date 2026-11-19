@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useLocale, useTranslations, type Locale } from "next-intl";
 import { useTheme } from "next-themes";
 import { NAMES } from "@/components/language-switcher";
@@ -17,8 +17,9 @@ import {
 import { useLogout, useMe } from "@/features/auth/use-auth";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
-export function UserMenu() {
+export function UserMenu({ collapsed = false }: { collapsed?: boolean }) {
   const ts = useTranslations("Shell");
   const tTheme = useTranslations("Theme");
   const tLang = useTranslations("Language");
@@ -29,7 +30,8 @@ export function UserMenu() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const initial = (user?.name ?? user?.email ?? "?").charAt(0).toUpperCase();
+  const display = user?.name ?? user?.email;
+  const initial = (display ?? "?").charAt(0).toUpperCase();
 
   return (
     <DropdownMenu>
@@ -37,19 +39,46 @@ export function UserMenu() {
         <button
           type="button"
           aria-label={ts("userMenu")}
-          className="grid size-10 place-items-center rounded-full border-2 border-primary bg-primary font-extrabold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          title={collapsed ? display : undefined}
+          className={cn(
+            "rounded-2xl border-2 border-transparent transition-colors hover:bg-muted data-[state=open]:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            collapsed
+              ? "mx-auto grid size-12 place-items-center"
+              : "flex w-full items-center gap-3 p-2 text-start",
+          )}
         >
-          {initial}
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary font-extrabold text-primary-foreground">
+            {initial}
+          </span>
+          {!collapsed && (
+            <>
+              <span className="grid min-w-0 flex-1">
+                <span dir="auto" className="truncate font-bold">
+                  {display}
+                </span>
+                {user?.name && (
+                  <span className="truncate text-xs text-muted-foreground">
+                    <bdi dir="ltr">{user.email}</bdi>
+                  </span>
+                )}
+              </span>
+              <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            </>
+          )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
+      <DropdownMenuContent
+        side="top"
+        align="start"
+        className="max-h-(--radix-dropdown-menu-content-available-height) min-w-60 overflow-y-auto"
+      >
         <DropdownMenuLabel className="grid gap-0.5 font-normal">
           <span dir="auto" className="truncate font-bold">
-            {user?.name ?? user?.email}
+            {display}
           </span>
           {user?.name && (
-            <span dir="ltr" className="truncate text-start text-xs text-muted-foreground">
-              {user.email}
+            <span className="truncate text-xs text-muted-foreground">
+              <bdi dir="ltr">{user.email}</bdi>
             </span>
           )}
         </DropdownMenuLabel>

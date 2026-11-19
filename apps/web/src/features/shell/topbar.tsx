@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ToolId } from "@/features/tools/registry";
 import { SidebarContent } from "./sidebar-content";
-import { UserMenu } from "./user-menu";
 
 export function Topbar({
   activeTool,
@@ -44,7 +43,6 @@ export function Topbar({
             Ctrl K
           </kbd>
         </Button>
-        <UserMenu />
       </div>
     </header>
   );

@@ -86,6 +86,8 @@
     "goTo": "Aller à",
     "preferences": "Préférences",
     "account": "Compte",
-    "comingSoonText": "Cette partie de LifeOS est en construction. Revenez bientôt."
+    "comingSoonText": "Cette partie de LifeOS est en construction. Revenez bientôt.",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale"
   }
 }
