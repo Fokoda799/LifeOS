@@ -1,0 +1,19 @@
+{
+  "Meta": {
+    "title": "LifeOS",
+    "description": "Money, tasks and training in one place"
+  },
+  "Home": {
+    "title": "Your life, in one place",
+    "description": "Money, tasks and training. Pick a tool to get started."
+  },
+  "Theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "Language": {
+    "label": "Language"
+  }
+}

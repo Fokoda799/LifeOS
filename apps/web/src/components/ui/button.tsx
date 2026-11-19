@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 // The "lip": a flat darker edge under the button that it sinks into when pressed.
 const chunky =
-  "shadow-[0_4px_0_0_var(--btn-edge)] active:translate-y-1 active:shadow-none motion-reduce:transition-none";
+  "shadow-[0_4px_0_0_var(--btn-edge)] hover:translate-y-[1px] hover:shadow-[0_3px_0_0_var(--btn-edge)] active:translate-y-1 active:shadow-none transition-all duration-150 motion-reduce:transition-none";
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold outline-none select-none transition-[transform,box-shadow,filter] focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-destructive/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",

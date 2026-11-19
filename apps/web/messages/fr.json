@@ -1,0 +1,19 @@
+{
+  "Meta": {
+    "title": "LifeOS",
+    "description": "Argent, tâches et entraînement au même endroit"
+  },
+  "Home": {
+    "title": "Votre vie, au même endroit",
+    "description": "Argent, tâches et entraînement. Choisissez un outil pour commencer."
+  },
+  "Theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "Language": {
+    "label": "Langue"
+  }
+}

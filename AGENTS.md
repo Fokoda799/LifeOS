@@ -69,22 +69,13 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 ## Frontend rules
 
 - Locales: `en`, `fr`, `ar` via next-intl. No hard-coded user-facing strings. Arabic is RTL.
-- Use logical CSS utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`, `text-start`). Never `left`/`right`.
-- Dark-first. Colors are tokens, never raw hex in components:
-
-| Token               | Hex                   | Use                         |
-| ------------------- | --------------------- | --------------------------- |
-| bg                  | `#0B0F14`             | app background              |
-| surface / surface-2 | `#121821` / `#19212C` | cards / hover, inputs       |
-| border              | `#263041`             | dividers                    |
-| text / text-muted   | `#E6EAF0` / `#8B97A8` | primary / secondary text    |
-| primary (Money)     | `#2DD4A7`             | brand and Money accent      |
-| tasks / training    | `#8B5CF6` / `#F59E0B` | tool accents                |
-| income / expense    | `#34D399` / `#F87171` | positive / negative amounts |
-| warning / info      | `#FBBF24` / `#60A5FA` | budget warning / highlights |
-
-- Money uses tabular numerals. Fonts: Inter, IBM Plex Sans Arabic.
-- Planned stack: Tailwind v4 + shadcn/ui, React Hook Form + Zod, TanStack Query, Recharts.
+- Use logical CSS utilities (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`, `text-start`). Never `left`/`right`. `components.json` has `"rtl": true`, so `shadcn add` converts new components itself.
+- Light is the default theme, dark is available (`.dark`). Never use raw hex in components; use tokens from `apps/web/src/app/globals.css` (`bg-background`, `bg-card`, `text-muted-foreground`, `bg-primary`, `text-income`, `text-expense`).
+- Accent: the platform is purple. A wrapper with `data-tool="money" | "tasks" | "training"` swaps `--primary` to that tool's color (Money teal, Tasks blue, Training orange), so shadcn components re-theme automatically. The app shell sets `data-tool` from the route.
+- Style: flat surfaces, 2px borders instead of shadows, rounded corners, chunky buttons with a darker bottom lip (`Button` in `components/ui/button.tsx`). Keep data tables and charts calm.
+- Fonts: Nunito (Latin) with Baloo Bhaijaan 2 (Arabic). Money uses `tabular-nums`.
+- UI components are shadcn/ui (Radix) in `apps/web/src/components/ui`.
+- Planned stack: React Hook Form + Zod, TanStack Query, Recharts.
 
 ## Working style
 

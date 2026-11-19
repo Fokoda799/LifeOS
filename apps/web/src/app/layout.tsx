@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Baloo_Bhaijaan_2, Nunito } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { isRtl, routing } from "@/i18n/routing";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -18,20 +20,24 @@ const arabic = Baloo_Bhaijaan_2({
 
 export const metadata: Metadata = {
   title: "LifeOS",
-  description: "Money, tasks and training in one place",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
+  const locale = routing.locales.includes(localeCookie as (typeof routing.locales)[number])
+    ? localeCookie
+    : routing.defaultLocale;
+
   return (
-    // lang and dir become dynamic when i18n arrives (P1-08, P1-09).
-    <html lang="en" suppressHydrationWarning className={`${nunito.variable} ${arabic.variable}`}>
+    <html
+      lang={locale}
+      dir={isRtl(locale ?? routing.defaultLocale) ? "rtl" : "ltr"}
+      suppressHydrationWarning
+      className={`${nunito.variable} ${arabic.variable}`}
+    >
       <body className="min-h-dvh bg-background text-foreground antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           {children}
           <Toaster />
         </ThemeProvider>

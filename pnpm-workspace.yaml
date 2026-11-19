@@ -3,8 +3,10 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  '@parcel/watcher': false
   '@prisma/engines': false
   '@scarf/scarf': false
+  '@swc/core': false
   argon2: false
   esbuild: false
   prisma: false
