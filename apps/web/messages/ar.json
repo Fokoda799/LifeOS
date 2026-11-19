@@ -62,5 +62,30 @@
       "task3": "مشي المساء",
       "streak": "سلسلة من {count} أيام"
     }
+  },
+  "Nav": {
+    "dashboard": "لوحة التحكم",
+    "settings": "الإعدادات",
+    "overview": "نظرة عامة",
+    "accounts": "الحسابات",
+    "transactions": "المعاملات",
+    "budgets": "الميزانيات",
+    "goals": "الأهداف",
+    "reports": "التقارير"
+  },
+  "Shell": {
+    "mainDashboard": "لوحة التحكم الرئيسية",
+    "switchTool": "تبديل الأداة",
+    "openMenu": "فتح القائمة",
+    "userMenu": "قائمة الحساب",
+    "search": "بحث",
+    "paletteTitle": "لوحة الأوامر",
+    "paletteDescription": "ابحث في الصفحات والإجراءات",
+    "palettePlaceholder": "اكتب أمرًا أو ابحث…",
+    "noResults": "لا توجد نتائج.",
+    "goTo": "الانتقال إلى",
+    "preferences": "التفضيلات",
+    "account": "الحساب",
+    "comingSoonText": "هذا الجزء من LifeOS قيد الإنشاء. عد قريبًا."
   }
 }

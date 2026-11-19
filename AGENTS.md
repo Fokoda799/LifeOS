@@ -79,6 +79,7 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - RTL: direction comes from `DirectionProvider` in the locale layout. Icons that point a direction (chevrons, arrows, "back") get `rtl:rotate-180` (or `rtl:-scale-x-100`). Never use `space-x-*`, use `gap-*`.
 - Money amounts (sign + currency + number) render inside `<bdi dir="ltr">` so signs and currency never reorder in RTL. User-written text (task titles, notes, names) gets `dir="auto"`.
 - Tools are defined once in `features/tools/registry.ts` (login showcase, later the sidebar switcher). New tool = registry entry + `[data-tool="<id>"]` block in `globals.css` + messages `Tools.<id>.*` + a preview in `previews.tsx`.
+- App shell: the active tool comes from the pathname (`activeToolId` in `features/shell/navigation.ts`) and is set as `data-tool` on the shell root (repeat it on portals like Sheet). Sidebar links per context live in `navigation.ts`; flip `enabled: true` when a page ships.
 
 ## Working style
 

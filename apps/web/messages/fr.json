@@ -62,5 +62,30 @@
       "task3": "Marche du soir",
       "streak": "Série de {count} jours"
     }
+  },
+  "Nav": {
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "overview": "Aperçu",
+    "accounts": "Comptes",
+    "transactions": "Transactions",
+    "budgets": "Budgets",
+    "goals": "Objectifs",
+    "reports": "Rapports"
+  },
+  "Shell": {
+    "mainDashboard": "Tableau de bord principal",
+    "switchTool": "Changer d'outil",
+    "openMenu": "Ouvrir le menu",
+    "userMenu": "Menu du compte",
+    "search": "Rechercher",
+    "paletteTitle": "Palette de commandes",
+    "paletteDescription": "Rechercher des pages et des actions",
+    "palettePlaceholder": "Saisissez une commande ou recherchez…",
+    "noResults": "Aucun résultat.",
+    "goTo": "Aller à",
+    "preferences": "Préférences",
+    "account": "Compte",
+    "comingSoonText": "Cette partie de LifeOS est en construction. Revenez bientôt."
   }
 }

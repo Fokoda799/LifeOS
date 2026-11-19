@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 // Language names are shown in their own language on purpose.
-const NAMES: Record<(typeof routing.locales)[number], string> = {
+export const NAMES: Record<(typeof routing.locales)[number], string> = {
   en: "English",
   fr: "Français",
   ar: "العربية",

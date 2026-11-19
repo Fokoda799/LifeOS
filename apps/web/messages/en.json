@@ -62,5 +62,30 @@
       "task3": "Evening walk",
       "streak": "{count}-day streak"
     }
+  },
+  "Nav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "overview": "Overview",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "budgets": "Budgets",
+    "goals": "Goals",
+    "reports": "Reports"
+  },
+  "Shell": {
+    "mainDashboard": "Main dashboard",
+    "switchTool": "Switch tool",
+    "openMenu": "Open menu",
+    "userMenu": "Account menu",
+    "search": "Search",
+    "paletteTitle": "Command palette",
+    "paletteDescription": "Search pages and actions",
+    "palettePlaceholder": "Type a command or search…",
+    "noResults": "No results found.",
+    "goTo": "Go to",
+    "preferences": "Preferences",
+    "account": "Account",
+    "comingSoonText": "This part of LifeOS is being built. Check back soon."
   }
 }
