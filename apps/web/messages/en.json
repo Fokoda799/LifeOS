@@ -31,11 +31,30 @@
     "noAccount": "No account yet?",
     "haveAccount": "Already have an account?",
     "submitting": "Please wait…",
+    "step": "Step {current} of {total}",
+    "emailStepSubtitle": "Enter your email and we'll send you a code to verify it.",
+    "continue": "Continue",
+    "verifyTitle": "Check your email",
+    "verifySubtitle": "We sent a 6-digit code to <email>{address}</email>.",
+    "code": "Verification code",
+    "verify": "Verify",
+    "verifying": "Verifying…",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {seconds}s",
+    "codeResent": "A new code is on its way.",
+    "changeEmail": "Use a different email",
+    "completeTitle": "Almost done",
+    "completeSubtitle": "Choose a password to finish creating your account.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "startOver": "Start over",
     "errors": {
       "invalidCredentials": "Wrong email or password.",
       "emailTaken": "This email is already registered.",
       "network": "Can't reach the server. Try again.",
-      "generic": "Something went wrong. Try again."
+      "generic": "Something went wrong. Try again.",
+      "invalidCode": "Wrong or expired code.",
+      "sessionExpired": "Your verification expired. Please start again."
     }
   },
   "Validation": {
@@ -43,7 +62,8 @@
     "email": "Enter a valid email address",
     "passwordMin": "At least 8 characters",
     "tooLong": "Too long",
-    "invalid": "Invalid value"
+    "invalid": "Invalid value",
+    "code": "Enter the 6-digit code"
   },
   "Dashboard": { "welcome": "Welcome, {name}" },
   "Tools": {

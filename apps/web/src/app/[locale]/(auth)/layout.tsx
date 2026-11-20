@@ -1,6 +1,6 @@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { GuestRedirect } from "@/features/auth/guest-redirect";
+// import { GuestRedirect } from "@/features/auth/guest-redirect";
 import { ToolShowcase } from "@/features/tools/tool-showcase";
 import { Link } from "@/i18n/navigation";
 

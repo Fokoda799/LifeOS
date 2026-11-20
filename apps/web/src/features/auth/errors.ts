@@ -1,11 +1,11 @@
 import type { FieldError } from "react-hook-form";
 import { ApiRequestError } from "@/lib/api";
 
-export type ValidationKey = "required" | "email" | "passwordMin" | "tooLong" | "invalid";
+export type ValidationKey = "required" | "email" | "passwordMin" | "tooLong" | "invalid" | "code";
 
 export function validationKey(
   error: FieldError | undefined,
-  opts?: { tooSmall?: ValidationKey },
+  opts?: { tooSmall?: ValidationKey; invalidFormat?: ValidationKey },
 ): ValidationKey | undefined {
   if (!error) return undefined;
   switch (error.type) {
@@ -14,16 +14,19 @@ export function validationKey(
     case "too_big":
       return "tooLong";
     case "invalid_format":
-      return "email";
+      return opts?.invalidFormat ?? "email";
     default:
       return "invalid";
   }
 }
 
-export type ApiErrorKey = "invalidCredentials" | "emailTaken" | "network" | "generic";
+export type ApiErrorKey =
+  "invalidCredentials" | "emailTaken" | "invalidCode" | "sessionExpired" | "network" | "generic";
 
-export function apiErrorKey(error: unknown): ApiErrorKey {
+/** `onBadRequest` says what a 400 means on the current screen. */
+export function apiErrorKey(error: unknown, onBadRequest: ApiErrorKey = "generic"): ApiErrorKey {
   if (error instanceof ApiRequestError) {
+    if (error.status === 400) return onBadRequest;
     if (error.status === 401) return "invalidCredentials";
     if (error.status === 409) return "emailTaken";
     return "generic";

@@ -7,7 +7,6 @@ import {
 import * as argon2 from 'argon2';
 import type {
   LoginInput,
-  RegisterInput,
   RegisterCompleteData,
   ResetPasswordInput,
 } from '@lifeos/shared';
@@ -28,31 +27,6 @@ export class AuthService {
     private readonly tokens: TokenService,
     private readonly verification: VerificationService,
   ) {}
-
-  async register(input: RegisterInput, meta: ClientMeta) {
-    if (await this.users.findByEmail(input.email)) {
-      throw new ConflictException('Email already registered');
-    }
-    const passwordHash = await argon2.hash(input.password);
-    try {
-      const user = await this.users.create({
-        email: input.email,
-        passwordHash,
-        name: input.name,
-        locale: input.locale,
-        currency: input.currency,
-      });
-      return {
-        user: this.users.toPublic(user),
-        tokens: await this.tokens.issue(user.id, meta),
-      };
-    } catch (e) {
-      if ((e as { code?: string }).code === 'P2002') {
-        throw new ConflictException('Email already registered');
-      }
-      throw e;
-    }
-  }
 
   async login(input: LoginInput, meta: ClientMeta) {
     const user = await this.users.findByEmail(input.email);

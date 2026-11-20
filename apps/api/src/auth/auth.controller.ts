@@ -21,12 +21,10 @@ import {
   loginSchema,
   okSchema,
   refreshBodySchema,
-  registerSchema,
   type StartVerificationData,
   startVerificationSchema,
   userSchema,
   type LoginInput,
-  type RegisterInput,
   verifyCodeSchema,
   verifiedTokenSchema,
   type VerifyCodeInput,
@@ -100,21 +98,6 @@ export class AuthController {
       };
     }
     return { user: result.user };
-  }
-
-  @Public()
-  @Post('register')
-  @ApiOperation({ summary: 'Create an account and sign in' })
-  @ClientHeader()
-  @ZodBody(registerSchema)
-  @ZodResponse(201, authResultSchema, 'Account created')
-  @ApiErrors(400, 409)
-  async register(
-    @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return this.respond(req, res, await this.auth.register(body, metaOf(req)));
   }
 
   @Public()
