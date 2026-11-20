@@ -4,7 +4,6 @@ import { PreferencesForm } from "@/features/settings/preferences-form";
 import { ProfileForm } from "@/features/settings/profile-form";
 import { SettingsSection } from "@/features/settings/settings-section";
 
-import { toast } from "sonner";
 export default function SettingsPage() {
   const t = useTranslations("Settings");
 

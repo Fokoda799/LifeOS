@@ -18,7 +18,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { platformNav, toolNav, type NavItem } from "./navigation";
 import { UpdateProfileInput } from "@lifeos/shared";
-import { toast } from "sonner";
 import { useUpdateProfile } from "../settings/use-update-profile";
 
 const themeIcons = { light: Sun, dark: Moon, system: Monitor } as const;
