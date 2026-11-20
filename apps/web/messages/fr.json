@@ -31,11 +31,30 @@
     "noAccount": "Pas encore de compte ?",
     "haveAccount": "Vous avez déjà un compte ?",
     "submitting": "Veuillez patienter…",
+    "step": "Étape {current} sur {total}",
+    "emailStepSubtitle": "Saisissez votre e-mail et nous vous enverrons un code pour le vérifier.",
+    "continue": "Continuer",
+    "verifyTitle": "Consultez vos e-mails",
+    "verifySubtitle": "Nous avons envoyé un code à 6 chiffres à <email>{address}</email>.",
+    "code": "Code de vérification",
+    "verify": "Vérifier",
+    "verifying": "Vérification…",
+    "resend": "Envoyer un nouveau code",
+    "resendIn": "Nouveau code dans {seconds} s",
+    "codeResent": "Un nouveau code est en route.",
+    "changeEmail": "Utiliser un autre e-mail",
+    "completeTitle": "Presque terminé",
+    "completeSubtitle": "Choisissez un mot de passe pour finir de créer votre compte.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "startOver": "Recommencer",
     "errors": {
       "invalidCredentials": "E-mail ou mot de passe incorrect.",
       "emailTaken": "Cet e-mail est déjà utilisé.",
       "network": "Impossible de joindre le serveur. Réessayez.",
-      "generic": "Une erreur est survenue. Réessayez."
+      "generic": "Une erreur est survenue. Réessayez.",
+      "invalidCode": "Code incorrect ou expiré.",
+      "sessionExpired": "Votre vérification a expiré. Recommencez."
     }
   },
   "Validation": {
@@ -43,7 +62,8 @@
     "email": "Saisissez une adresse e-mail valide",
     "passwordMin": "8 caractères minimum",
     "tooLong": "Trop long",
-    "invalid": "Valeur invalide"
+    "invalid": "Valeur invalide",
+    "code": "Saisissez le code à 6 chiffres"
   },
   "Dashboard": { "welcome": "Bienvenue, {name}" },
   "Tools": {

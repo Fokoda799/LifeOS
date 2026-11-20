@@ -31,11 +31,30 @@
     "noAccount": "ليس لديك حساب؟",
     "haveAccount": "لديك حساب بالفعل؟",
     "submitting": "يرجى الانتظار…",
+    "step": "الخطوة {current} من {total}",
+    "emailStepSubtitle": "أدخل بريدك الإلكتروني وسنرسل لك رمزًا للتحقق منه.",
+    "continue": "متابعة",
+    "verifyTitle": "تحقق من بريدك",
+    "verifySubtitle": "أرسلنا رمزًا من 6 أرقام إلى <email>{address}</email>.",
+    "code": "رمز التحقق",
+    "verify": "تحقق",
+    "verifying": "جارٍ التحقق…",
+    "resend": "إرسال رمز جديد",
+    "resendIn": "رمز جديد خلال {seconds} ث",
+    "codeResent": "رمز جديد في الطريق.",
+    "changeEmail": "استخدام بريد إلكتروني آخر",
+    "completeTitle": "اقتربت من الانتهاء",
+    "completeSubtitle": "اختر كلمة مرور لإكمال إنشاء حسابك.",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "startOver": "ابدأ من جديد",
     "errors": {
       "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
       "emailTaken": "هذا البريد الإلكتروني مسجّل بالفعل.",
       "network": "تعذّر الاتصال بالخادم. حاول مرة أخرى.",
-      "generic": "حدث خطأ ما. حاول مرة أخرى."
+      "generic": "حدث خطأ ما. حاول مرة أخرى.",
+      "invalidCode": "الرمز غير صحيح أو منتهي الصلاحية.",
+      "sessionExpired": "انتهت صلاحية التحقق. ابدأ من جديد."
     }
   },
   "Validation": {
@@ -43,7 +62,8 @@
     "email": "أدخل بريدًا إلكترونيًا صالحًا",
     "passwordMin": "8 أحرف على الأقل",
     "tooLong": "طويل جدًا",
-    "invalid": "قيمة غير صالحة"
+    "invalid": "قيمة غير صالحة",
+    "code": "أدخل الرمز المكون من 6 أرقام"
   },
   "Dashboard": { "welcome": "مرحبًا، {name}" },
   "Tools": {
