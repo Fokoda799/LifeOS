@@ -2,12 +2,19 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import type { LoginInput, RegisterInput } from '@lifeos/shared';
+import type {
+  LoginInput,
+  RegisterInput,
+  RegisterCompleteData,
+  ResetPasswordInput,
+} from '@lifeos/shared';
 import { UsersService } from '../users/users.service';
 import type { ClientMeta } from './auth.types';
 import { TokenService } from './token.service';
+import { VerificationService } from './verification.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +26,7 @@ export class AuthService {
   constructor(
     private readonly users: UsersService,
     private readonly tokens: TokenService,
+    private readonly verification: VerificationService,
   ) {}
 
   async register(input: RegisterInput, meta: ClientMeta) {
@@ -74,5 +82,41 @@ export class AuthService {
     const user = await this.users.findById(userId);
     if (!user) throw new UnauthorizedException();
     return this.users.toPublic(user);
+  }
+
+  async registerComplete(input: RegisterCompleteData, meta: ClientMeta) {
+    const email = await this.verification.consume(input.token, 'REGISTER');
+    const passwordHash = await argon2.hash(input.password);
+    try {
+      const user = await this.users.create({
+        email,
+        passwordHash,
+        name: input.name,
+        locale: input.locale,
+        currency: input.currency,
+        emailVerifiedAt: new Date(),
+      });
+      return {
+        user: this.users.toPublic(user),
+        tokens: await this.tokens.issue(user.id, meta),
+      };
+    } catch (e) {
+      if ((e as { code?: string }).code === 'P2002') {
+        throw new ConflictException('Email already registered');
+      }
+      throw e;
+    }
+  }
+
+  async resetPassword(input: ResetPasswordInput) {
+    const email = await this.verification.consume(
+      input.token,
+      'PASSWORD_RESET',
+    );
+    const user = await this.users.findByEmail(email);
+    if (!user) throw new BadRequestException('Invalid or expired token');
+    await this.users.setPassword(user.id, await argon2.hash(input.password));
+    // Everyone signed in with the old password is signed out.
+    await this.tokens.revokeAllForUser(user.id);
   }
 }

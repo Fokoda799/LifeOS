@@ -90,4 +90,11 @@ export class TokenService {
       data: { revokedAt: new Date() },
     });
   }
+
+  async revokeAllForUser(userId: string) {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
 }

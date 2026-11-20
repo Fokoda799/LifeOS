@@ -8,6 +8,7 @@ type NewUser = {
   name?: string;
   locale: string;
   currency: string;
+  emailVerifiedAt?: Date;
 };
 
 @Injectable()
@@ -37,6 +38,10 @@ export class UsersService {
   ) {
     // Always scoped to the authenticated user's own id.
     return this.prisma.user.update({ where: { id }, data });
+  }
+
+  setPassword(id: string, passwordHash: string) {
+    return this.prisma.user.update({ where: { id }, data: { passwordHash } });
   }
 
   /** Strips the password hash and validates the shape sent to clients. */

@@ -57,6 +57,7 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - **Auth:** a global `JwtAuthGuard` protects every route unless it has `@Public()`. Web uses httpOnly cookies (`access_token`, `refresh_token`). Mobile sends `x-client: mobile` and gets tokens in the JSON body, then uses `Authorization: Bearer`. Refresh tokens are opaque, HMAC-hashed in the database and rotated; reusing an old one revokes its whole family. Do not change this design without asking.
 - **Errors:** everything goes through `AllExceptionsFilter` and returns `{ statusCode, error, message, errors?, path, timestamp }`. Throw Nest `HttpException`s.
 - **Ownership:** every query on user data must filter by the authenticated user's id. No exceptions.
+- - Accounts are created only through the email-verified flow: `register/start → verify → complete`. Password reset is `password/forgot → verify → reset` and revokes every session. `start` endpoints always answer 202 (no account enumeration). Dev mail goes to Mailpit (`localhost:8025`); production uses SMTP env vars (`MAIL_*`).
 
 ## Money rules (non-negotiable)
 
