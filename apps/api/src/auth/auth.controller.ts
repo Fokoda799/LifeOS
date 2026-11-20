@@ -19,11 +19,21 @@ import {
 import {
   authResultSchema,
   loginSchema,
+  okSchema,
   refreshBodySchema,
   registerSchema,
+  type StartVerificationData,
+  startVerificationSchema,
   userSchema,
   type LoginInput,
   type RegisterInput,
+  verifyCodeSchema,
+  verifiedTokenSchema,
+  type VerifyCodeInput,
+  registerCompleteSchema,
+  type RegisterCompleteData,
+  resetPasswordSchema,
+  type ResetPasswordInput,
 } from '@lifeos/shared';
 import type { Request, Response } from 'express';
 import type { Env } from '../config/env';
@@ -33,6 +43,7 @@ import { AuthService } from './auth.service';
 import type { ClientMeta, Tokens } from './auth.types';
 import { CurrentUser } from './current-user.decorator';
 import { Public } from './public.decorator';
+import { VerificationService } from './verification.service';
 
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
@@ -58,6 +69,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly config: ConfigService<Env, true>,
+    private readonly verification: VerificationService,
   ) {}
 
   private respond(
@@ -167,5 +179,107 @@ export class AuthController {
   @ApiErrors(401)
   me(@CurrentUser() user: { id: string }) {
     return this.auth.me(user.id);
+  }
+
+  @Public()
+  @Post('register/start')
+  @HttpCode(202)
+  @ApiOperation({
+    summary: 'Step 1: email a verification code (always answers 202)',
+  })
+  @ZodBody(startVerificationSchema)
+  @ZodResponse(202, okSchema)
+  @ApiErrors(400)
+  async registerStart(
+    @Body(new ZodValidationPipe(startVerificationSchema))
+    body: StartVerificationData,
+  ) {
+    await this.verification.start('REGISTER', body.email, body.locale);
+    return { ok: true as const };
+  }
+
+  @Public()
+  @Post('register/verify')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Step 2: check the code, get a 15-minute registration token',
+  })
+  @ZodBody(verifyCodeSchema)
+  @ZodResponse(200, verifiedTokenSchema)
+  @ApiErrors(400)
+  async registerVerify(
+    @Body(new ZodValidationPipe(verifyCodeSchema)) body: VerifyCodeInput,
+  ) {
+    return {
+      token: await this.verification.verify('REGISTER', body.email, body.code),
+    };
+  }
+
+  @Public()
+  @Post('register/complete')
+  @ClientHeader()
+  @ZodBody(registerCompleteSchema)
+  @ZodResponse(201, authResultSchema, 'Account created')
+  @ApiErrors(400, 409)
+  async registerComplete(
+    @Body(new ZodValidationPipe(registerCompleteSchema))
+    body: RegisterCompleteData,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.respond(
+      req,
+      res,
+      await this.auth.registerComplete(body, metaOf(req)),
+    );
+  }
+
+  @Public()
+  @Post('password/forgot')
+  @HttpCode(202)
+  @ApiOperation({ summary: 'Email a password reset code (always answers 202)' })
+  @ZodBody(startVerificationSchema)
+  @ZodResponse(202, okSchema)
+  @ApiErrors(400)
+  async passwordForgot(
+    @Body(new ZodValidationPipe(startVerificationSchema))
+    body: StartVerificationData,
+  ) {
+    await this.verification.start('PASSWORD_RESET', body.email, body.locale);
+    return { ok: true as const };
+  }
+
+  @Public()
+  @Post('password/verify')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Check the reset code, get a 15-minute reset token',
+  })
+  @ZodBody(verifyCodeSchema)
+  @ZodResponse(200, verifiedTokenSchema)
+  @ApiErrors(400)
+  async passwordVerify(
+    @Body(new ZodValidationPipe(verifyCodeSchema)) body: VerifyCodeInput,
+  ) {
+    return {
+      token: await this.verification.verify(
+        'PASSWORD_RESET',
+        body.email,
+        body.code,
+      ),
+    };
+  }
+
+  @Public()
+  @Post('password/reset')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Set a new password and sign out every session' })
+  @ZodBody(resetPasswordSchema)
+  @ApiResponse({ status: 204, description: 'Password changed' })
+  @ApiErrors(400)
+  async passwordReset(
+    @Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput,
+  ) {
+    await this.auth.resetPassword(body);
   }
 }

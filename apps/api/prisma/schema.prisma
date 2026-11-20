@@ -8,6 +8,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum VerificationPurpose {
+  REGISTER
+  PASSWORD_RESET
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -17,11 +22,27 @@ model User {
   currency     String   @default("MAD")
 
   refreshTokens RefreshToken[]
+  emailVerifiedAt DateTime?
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@map("users")
+}
+
+model VerificationCode {
+  id         String              @id @default(cuid())
+  email      String
+  purpose    VerificationPurpose
+  codeHash   String
+  attempts   Int                 @default(0)
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  usedAt     DateTime?
+  createdAt  DateTime            @default(now())
+
+  @@index([email, purpose, createdAt])
+  @@map("verification_codes")
 }
 
 model RefreshToken {

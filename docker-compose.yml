@@ -17,5 +17,11 @@ services:
       timeout: 5s
       retries: 10
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"   # SMTP the API sends to
+      - "8025:8025"   # web inbox: http://localhost:8025
+
 volumes:
   lifeos_pgdata:

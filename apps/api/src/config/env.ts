@@ -11,6 +11,12 @@ export const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive().default(900),
   REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  CODE_HMAC_SECRET: z.string().min(32),
+  MAIL_HOST: z.string().default('localhost'),
+  MAIL_PORT: z.coerce.number().default(1025),
+  MAIL_USER: z.string().optional(),
+  MAIL_PASS: z.string().optional(),
+  MAIL_FROM: z.string().default('LifeOS <no-reply@lifeos.local>'),
 });
 
 export type Env = z.infer<typeof envSchema>;
