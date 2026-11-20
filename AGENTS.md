@@ -87,3 +87,4 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - Before saying a task is done: `pnpm typecheck && pnpm lint && pnpm --filter api build`.
 - Ask before: changing auth, writing a migration that drops data, adding a dependency for something we already solve, or upgrading a major version.
 - Never edit an applied migration. Create a new one.
+- CI (`.github/workflows/ci.yml`) runs shared build, prisma generate, typecheck, lint, format:check, test and build on every push and PR. Keep it green. A new required env var needs a dummy value in the workflow.
