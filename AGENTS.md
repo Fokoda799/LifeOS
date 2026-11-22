@@ -55,6 +55,8 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - Controllers handle HTTP only. Services hold business rules. Only services or repositories talk to Prisma.
 - **Validation:** schemas live in `packages/shared` and are used by both the API and web forms. The API uses `ZodValidationPipe(schema)`. New endpoints also get `@ZodBody`, `@ZodResponse` and `@ApiErrors` so the OpenAPI spec stays accurate.
 - **Auth:** a global `JwtAuthGuard` protects every route unless it has `@Public()`. Web uses httpOnly cookies (`access_token`, `refresh_token`). Mobile sends `x-client: mobile` and gets tokens in the JSON body, then uses `Authorization: Bearer`. Refresh tokens are opaque, HMAC-hashed in the database and rotated; reusing an old one revokes its whole family. Do not change this design without asking.
+- - Password reset uses the same email-code flow as registration (`/forgot-password/*`, shared `VerifyStep`). A reset revokes every refresh token for the user. The flow state (email, verified token) lives only in memory in `RegisterFlowProvider`, never in URLs or storage.
+
 - **Errors:** everything goes through `AllExceptionsFilter` and returns `{ statusCode, error, message, errors?, path, timestamp }`. Throw Nest `HttpException`s.
 - **Ownership:** every query on user data must filter by the authenticated user's id. No exceptions.
 - - Accounts are created only through the email-verified flow: `register/start → verify → complete`. Password reset is `password/forgot → verify → reset` and revokes every session. `start` endpoints always answer 202 (no account enumeration). Dev mail goes to Mailpit (`localhost:8025`); production uses SMTP env vars (`MAIL_*`).

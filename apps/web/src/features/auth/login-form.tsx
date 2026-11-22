@@ -73,6 +73,12 @@ export function LoginForm() {
             {t(`errors.${apiErrorKey(login.error)}`)}
           </p>
         )}
+        <Link
+          href="/forgot-password"
+          className="justify-self-end text-sm font-bold text-primary hover:underline"
+        >
+          {t("forgotLink")}
+        </Link>
         <Button type="submit" size="lg" disabled={login.isPending}>
           {login.isPending ? t("submitting") : t("signIn")}
         </Button>
