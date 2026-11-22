@@ -80,9 +80,54 @@
     "soon": "Soon",
     "pause": "Pause slideshow",
     "play": "Play slideshow",
-    "money": { "name": "Money", "tagline": "Know where every dirham goes." },
-    "tasks": { "name": "Tasks", "tagline": "Plan your day and finish what matters." },
-    "training": { "name": "Training", "tagline": "Build streaks that keep you moving." },
+    "galleryDescription": "Add the tools you want. You can remove them anytime and your data stays safe.",
+    "add": "Add",
+    "adding": "Adding…",
+    "open": "Open",
+    "remove": "Remove",
+    "removing": "Removing…",
+    "added": "Added",
+    "comingSoon": "Coming soon",
+    "toastAdded": "{name} added to your tools.",
+    "toastRemoved": "{name} removed. Your data is kept.",
+    "errorToggle": "Couldn't update your tools. Try again.",
+    "featuresLabel": "What you can do",
+    "removeTitle": "Remove {name}?",
+    "removeDescription": "{name} will disappear from your sidebar. Your data is kept and comes back if you add {name} again.",
+    "cancel": "Cancel",
+    "emptyTitle": "Add your first tool",
+    "emptyDescription": "Tools are the heart of LifeOS. Pick the ones you need.",
+    "browse": "Browse tools",
+    "money": {
+      "name": "Money",
+      "tagline": "Know where every dirham goes.",
+      "description": "Track every account, transaction and budget in one place.",
+      "features": {
+        "one": "Accounts, categories and transactions",
+        "two": "Monthly budgets with progress",
+        "three": "Savings goals and reports"
+      }
+    },
+    "tasks": {
+      "name": "Tasks",
+      "tagline": "Plan your day and finish what matters.",
+      "description": "Plan your day, organize projects and finish what matters.",
+      "features": {
+        "one": "Projects and to-do lists",
+        "two": "Kanban boards",
+        "three": "Habits and reminders"
+      }
+    },
+    "training": {
+      "name": "Training",
+      "tagline": "Build streaks that keep you moving.",
+      "description": "Follow workouts, track progress and keep your streak.",
+      "features": {
+        "one": "Workout plans and logs",
+        "two": "Progress and personal records",
+        "three": "Streaks that keep you moving"
+      }
+    },
     "preview": {
       "balance": "Balance",
       "task1": "Plan the week",
@@ -99,7 +144,8 @@
     "transactions": "Transactions",
     "budgets": "Budgets",
     "goals": "Goals",
-    "reports": "Reports"
+    "reports": "Reports",
+    "tools": "Tools"
   },
   "Shell": {
     "mainDashboard": "Main dashboard",
@@ -119,7 +165,8 @@
     "notificationsDescription": "Your recent updates and alerts.",
     "noNotifications": "You're all caught up.",
     "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar"
+    "expandSidebar": "Expand sidebar",
+    "addTool": "Add a tool"
   },
   "Settings": {
     "title": "Settings",

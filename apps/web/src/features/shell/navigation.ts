@@ -1,5 +1,6 @@
 import {
   ArrowLeftRight,
+  Blocks,
   Landmark,
   LayoutDashboard,
   PiggyBank,
@@ -19,12 +20,14 @@ export type NavKey =
   | "transactions"
   | "budgets"
   | "goals"
-  | "reports";
+  | "reports"
+  | "tools";
 
 export type NavItem = { key: NavKey; href: string; icon: LucideIcon; enabled: boolean };
 
 export const platformNav: readonly NavItem[] = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboard, enabled: true },
+  { key: "tools", href: "/tools", icon: Blocks, enabled: true },
   { key: "settings", href: "/settings", icon: Settings, enabled: true },
 ];
 
