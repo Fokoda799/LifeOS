@@ -13,6 +13,12 @@ enum VerificationPurpose {
   PASSWORD_RESET
 }
 
+enum ToolId {
+  money
+  tasks
+  training
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -23,6 +29,7 @@ model User {
 
   refreshTokens RefreshToken[]
   emailVerifiedAt DateTime?
+  tools       UserTool[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -60,4 +67,16 @@ model RefreshToken {
   @@index([userId])
   @@index([familyId])
   @@map("refresh_tokens")
+}
+
+model UserTool {
+  userId    String
+  toolId    ToolId
+  addedAt   DateTime  @default(now())
+  /// Set when the user removes the tool. The tool is hidden, its data is kept.
+  removedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, toolId])
+  @@map("user_tools")
 }
