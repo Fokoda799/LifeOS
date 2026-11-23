@@ -80,9 +80,54 @@
     "soon": "Bientôt",
     "pause": "Mettre le diaporama en pause",
     "play": "Lancer le diaporama",
-    "money": { "name": "Argent", "tagline": "Sachez où va chaque dirham." },
-    "tasks": { "name": "Tâches", "tagline": "Planifiez votre journée et finissez l'essentiel." },
-    "training": { "name": "Entraînement", "tagline": "Créez des séries qui vous font avancer." },
+    "galleryDescription": "Ajoutez les outils dont vous avez besoin. Vous pouvez les retirer à tout moment, vos données restent en sécurité.",
+    "add": "Ajouter",
+    "adding": "Ajout…",
+    "open": "Ouvrir",
+    "remove": "Retirer",
+    "removing": "Retrait…",
+    "added": "Ajouté",
+    "comingSoon": "Bientôt disponible",
+    "toastAdded": "{name} ajouté à vos outils.",
+    "toastRemoved": "{name} retiré. Vos données sont conservées.",
+    "errorToggle": "Impossible de mettre à jour vos outils. Réessayez.",
+    "featuresLabel": "Ce que vous pouvez faire",
+    "removeTitle": "Retirer {name} ?",
+    "removeDescription": "{name} disparaîtra de votre barre latérale. Vos données sont conservées et reviendront si vous ajoutez {name} à nouveau.",
+    "cancel": "Annuler",
+    "emptyTitle": "Ajoutez votre premier outil",
+    "emptyDescription": "Les outils sont le cœur de LifeOS. Choisissez ceux dont vous avez besoin.",
+    "browse": "Parcourir les outils",
+    "money": {
+      "name": "Argent",
+      "tagline": "Sachez où va chaque dirham.",
+      "description": "Suivez chaque compte, transaction et budget au même endroit.",
+      "features": {
+        "one": "Comptes, catégories et transactions",
+        "two": "Budgets mensuels avec progression",
+        "three": "Objectifs d'épargne et rapports"
+      }
+    },
+    "tasks": {
+      "name": "Tâches",
+      "tagline": "Planifiez votre journée et finissez l'essentiel.",
+      "description": "Planifiez votre journée, organisez vos projets et terminez ce qui compte.",
+      "features": {
+        "one": "Projets et listes de tâches",
+        "two": "Tableaux kanban",
+        "three": "Habitudes et rappels"
+      }
+    },
+    "training": {
+      "name": "Entraînement",
+      "tagline": "Créez des séries qui vous font avancer.",
+      "description": "Suivez vos entraînements, mesurez vos progrès et gardez votre série.",
+      "features": {
+        "one": "Programmes et journal d'entraînement",
+        "two": "Progrès et records personnels",
+        "three": "Séries qui vous gardent en mouvement"
+      }
+    },
     "preview": {
       "balance": "Solde",
       "task1": "Planifier la semaine",
@@ -99,7 +144,8 @@
     "transactions": "Transactions",
     "budgets": "Budgets",
     "goals": "Objectifs",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "tools": "Outils"
   },
   "Shell": {
     "mainDashboard": "Tableau de bord principal",
@@ -119,7 +165,8 @@
     "notificationsDescription": "Vos mises à jour et alertes récentes.",
     "noNotifications": "Vous êtes à jour.",
     "collapseSidebar": "Réduire la barre latérale",
-    "expandSidebar": "Développer la barre latérale"
+    "expandSidebar": "Développer la barre latérale",
+    "addTool": "Ajouter un outil"
   },
   "Settings": {
     "title": "Paramètres",

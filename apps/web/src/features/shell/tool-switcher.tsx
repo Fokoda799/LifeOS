@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, LayoutGrid } from "lucide-react";
+import { ChevronsUpDown, LayoutGrid, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { tools, type ToolId } from "@/features/tools/registry";
+import { useAddedToolIds } from "@/features/tools/use-user-tools";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export function ToolSwitcher({
 }) {
   const ts = useTranslations("Shell");
   const tt = useTranslations("Tools");
+  const added = useAddedToolIds();
   const current = tools.find((x) => x.id === activeTool);
   const CurrentIcon = current?.icon ?? LayoutGrid;
   const label = current ? tt(`${current.id}.name`) : ts("mainDashboard");
@@ -58,27 +60,26 @@ export function ToolSwitcher({
             {ts("mainDashboard")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {tools.map((tool) => {
-          const Icon = tool.icon;
-          if (tool.status === "soon") {
+        {tools
+          .filter((tool) => added.has(tool.id))
+          .map((tool) => {
+            const Icon = tool.icon;
             return (
-              <DropdownMenuItem key={tool.id} disabled>
-                <Icon aria-hidden />
-                {tt(`${tool.id}.name`)}
-                <span className="ms-auto text-xs">{tt("soon")}</span>
+              <DropdownMenuItem key={tool.id} asChild>
+                <Link href={`/${tool.id}`}>
+                  <Icon aria-hidden />
+                  {tt(`${tool.id}.name`)}
+                </Link>
               </DropdownMenuItem>
             );
-          }
-          return (
-            <DropdownMenuItem key={tool.id} asChild>
-              <Link href={`/${tool.id}`}>
-                <Icon aria-hidden />
-                {tt(`${tool.id}.name`)}
-              </Link>
-            </DropdownMenuItem>
-          );
-        })}
+          })}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/tools">
+            <Plus aria-hidden />
+            {ts("addTool")}
+          </Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
