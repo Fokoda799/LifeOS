@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { HealthController } from './health.controller.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { MoneyModule } from './money/money.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './auth/auth.module.js';
       envFilePath: ['.env', '../../.env'],
       validate: validateEnv,
     }),
+    MoneyModule,
     PrismaModule,
     UsersModule,
   ],
