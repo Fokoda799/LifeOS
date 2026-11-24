@@ -71,7 +71,8 @@
     "passwordMin": "At least 8 characters",
     "tooLong": "Too long",
     "invalid": "Invalid value",
-    "code": "Enter the 6-digit code"
+    "code": "Enter the 6-digit code",
+    "amount": "Enter a valid amount"
   },
   "Dashboard": { "welcome": "Welcome, {name}" },
   "Tools": {
@@ -183,5 +184,51 @@
     "currencyHint": "Used for new accounts. Existing accounts keep their own currency.",
     "appearanceTitle": "Appearance",
     "appearanceDescription": "Choose how LifeOS looks on this device."
+  },
+  "Money": {
+    "accounts": {
+      "description": "Where your money lives: cash, banks, savings and wallets.",
+      "new": "New account",
+      "totalBalance": "Total balance",
+      "emptyTitle": "No accounts yet",
+      "emptyDescription": "Add your first account to start tracking your money.",
+      "archived": "Archived ({count})",
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete",
+      "actionsFor": "Actions for {name}",
+      "createTitle": "New account",
+      "editTitle": "Edit account",
+      "dialogDescription": "An account is a place where you keep money.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Cash wallet",
+      "type": "Type",
+      "currency": "Currency",
+      "currencyLocked": "The currency can't be changed after the account is created.",
+      "openingBalance": "Opening balance",
+      "openingBalanceHint": "What the account holds today. Use a minus sign for money you owe.",
+      "save": "Save",
+      "saving": "Saving…",
+      "create": "Create account",
+      "creating": "Creating…",
+      "cancel": "Cancel",
+      "toastCreated": "Account created.",
+      "toastSaved": "Saved.",
+      "toastArchived": "{name} archived.",
+      "toastRestored": "{name} restored.",
+      "toastDeleted": "{name} deleted.",
+      "errorSave": "Couldn't save the account. Try again.",
+      "errorLoad": "Couldn't load your accounts.",
+      "deleteTitle": "Delete {name}?",
+      "deleteDescription": "This permanently deletes the account and can't be undone. Archive it instead to hide it and keep its history.",
+      "types": {
+        "cash": "Cash",
+        "bank": "Bank",
+        "savings": "Savings",
+        "credit_card": "Credit card",
+        "e_wallet": "E-wallet"
+      }
+    }
   }
 }

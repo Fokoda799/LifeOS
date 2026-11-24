@@ -71,7 +71,8 @@
     "passwordMin": "8 caractères minimum",
     "tooLong": "Trop long",
     "invalid": "Valeur invalide",
-    "code": "Saisissez le code à 6 chiffres"
+    "code": "Saisissez le code à 6 chiffres",
+    "amount": "Saisissez un montant valide"
   },
   "Dashboard": { "welcome": "Bienvenue, {name}" },
   "Tools": {
@@ -183,5 +184,51 @@
     "currencyHint": "Utilisée pour les nouveaux comptes. Les comptes existants gardent leur propre devise.",
     "appearanceTitle": "Apparence",
     "appearanceDescription": "Choisissez l'apparence de LifeOS sur cet appareil."
+  },
+  "Money": {
+    "accounts": {
+      "description": "Là où se trouve votre argent : espèces, banques, épargne et portefeuilles.",
+      "new": "Nouveau compte",
+      "totalBalance": "Solde total",
+      "emptyTitle": "Aucun compte pour l'instant",
+      "emptyDescription": "Ajoutez votre premier compte pour commencer à suivre votre argent.",
+      "archived": "Archivés ({count})",
+      "edit": "Modifier",
+      "archive": "Archiver",
+      "restore": "Restaurer",
+      "delete": "Supprimer",
+      "actionsFor": "Actions pour {name}",
+      "createTitle": "Nouveau compte",
+      "editTitle": "Modifier le compte",
+      "dialogDescription": "Un compte est un endroit où vous gardez de l'argent.",
+      "name": "Nom",
+      "namePlaceholder": "ex. Portefeuille",
+      "type": "Type",
+      "currency": "Devise",
+      "currencyLocked": "La devise ne peut pas être modifiée après la création du compte.",
+      "openingBalance": "Solde initial",
+      "openingBalanceHint": "Ce que contient le compte aujourd'hui. Utilisez un signe moins pour l'argent que vous devez.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "create": "Créer le compte",
+      "creating": "Création…",
+      "cancel": "Annuler",
+      "toastCreated": "Compte créé.",
+      "toastSaved": "Enregistré.",
+      "toastArchived": "{name} archivé.",
+      "toastRestored": "{name} restauré.",
+      "toastDeleted": "{name} supprimé.",
+      "errorSave": "Impossible d'enregistrer le compte. Réessayez.",
+      "errorLoad": "Impossible de charger vos comptes.",
+      "deleteTitle": "Supprimer {name} ?",
+      "deleteDescription": "Cette action supprime définitivement le compte et est irréversible. Archivez-le plutôt pour le masquer et conserver son historique.",
+      "types": {
+        "cash": "Espèces",
+        "bank": "Banque",
+        "savings": "Épargne",
+        "credit_card": "Carte de crédit",
+        "e_wallet": "Portefeuille électronique"
+      }
+    }
   }
 }
