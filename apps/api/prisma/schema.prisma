@@ -8,17 +8,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum VerificationPurpose {
-  REGISTER
-  PASSWORD_RESET
-}
-
-enum ToolId {
-  money
-  tasks
-  training
-}
-
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -30,11 +19,18 @@ model User {
   refreshTokens RefreshToken[]
   emailVerifiedAt DateTime?
   tools       UserTool[]
+  accounts Account[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@map("users")
+}
+
+
+enum VerificationPurpose {
+  REGISTER
+  PASSWORD_RESET
 }
 
 model VerificationCode {
@@ -69,6 +65,13 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+
+enum ToolId {
+  money
+  tasks
+  training
+} 
+
 model UserTool {
   userId    String
   toolId    ToolId
@@ -79,4 +82,31 @@ model UserTool {
 
   @@id([userId, toolId])
   @@map("user_tools")
+}
+
+
+enum AccountType {
+  cash
+  bank
+  savings
+  credit_card
+  e_wallet
+}
+
+model Account {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  type           AccountType
+  /// ISO 4217 code. Fixed after creation.
+  currency       String
+  /// Minor units. May be negative (e.g. an existing card debt).
+  openingBalance BigInt      @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId, archivedAt])
+  @@map("accounts")
 }
