@@ -17,3 +17,4 @@ apps/api/.claude
 apps/api/.windsurf
 apps/api/skills-lock.json
 .envrc
+*.tsbuildinfo

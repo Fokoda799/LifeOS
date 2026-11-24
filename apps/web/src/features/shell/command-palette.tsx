@@ -4,6 +4,7 @@ import { LogOut, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations, type Locale } from "next-intl";
 import { useTheme } from "next-themes";
 import { NAMES } from "@/components/language-switcher";
+import { useAddedToolIds } from "@/features/tools/use-user-tools";
 import {
   CommandDialog,
   CommandEmpty,
@@ -39,6 +40,7 @@ export function CommandPalette({
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const logout = useLogout();
+  const added = useAddedToolIds();
 
   function run(action: () => void) {
     onOpenChange(false);
@@ -53,13 +55,15 @@ export function CommandPalette({
 
   const destinations = [
     ...platformNav.map((item) => ({ id: `platform-${item.key}`, label: tn(item.key), item })),
-    ...(Object.entries(toolNav) as [ToolId, readonly NavItem[]][]).flatMap(([toolId, items]) =>
-      items.map((item) => ({
-        id: `${toolId}-${item.key}`,
-        label: `${tt(`${toolId}.name`)} · ${tn(item.key)}`,
-        item,
-      })),
-    ),
+    ...(Object.entries(toolNav) as [ToolId, readonly NavItem[]][])
+      .filter(([toolId]) => added.has(toolId))
+      .flatMap(([toolId, items]) =>
+        items.map((item) => ({
+          id: `${toolId}-${item.key}`,
+          label: `${tt(`${toolId}.name`)} · ${tn(item.key)}`,
+          item,
+        })),
+      ),
   ].filter((d) => d.item.enabled);
 
   return (
