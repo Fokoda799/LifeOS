@@ -66,7 +66,7 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - Store amounts as integer minor units (`BigInt` in Prisma), never floats. Amounts are positive; the transaction type (INCOME, EXPENSE, TRANSFER) gives the sign.
 - Every amount has a currency. Default is MAD. Format only at the UI edge with `Intl`.
 - Account balances are computed from transactions, never stored as editable numbers.
-- `BigInt` does not serialize to JSON. Convert at the API boundary and document the chosen format here when P2-01 settles it.
+- **Money on the wire:** amounts are strings of whole minor units, e.g. `"150000"` = 1,500.00 MAD (`minorUnitsSchema` in `packages/shared/src/money.ts`). Prisma stores `BigInt`; convert only in mappers (`BigInt(str)` in, `.toString()` out), never with `Number`. Transaction amounts are positive. An account's `openingBalance` may be negative (existing debt), its `currency` is fixed after creation, and `balance` is always computed (opening + transactions).
 - Money logic needs unit tests (target 90% coverage).
 
 ## Frontend rules

@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useMe } from "@/features/auth/use-auth";
 import type { UpdateProfileInput } from "@lifeos/shared";
 import { useUpdateProfile } from "./use-update-profile";
-
-const CURRENCIES = ["MAD", "EUR", "USD", "GBP", "AED", "SAR", "CAD"] as const;
+import { CURRENCIES } from "@/lib/currencies";
 
 export function PreferencesForm() {
   const t = useTranslations("Settings");
