@@ -121,4 +121,13 @@ describe('AccountsService', () => {
       NotFoundException,
     );
   });
+
+  it('erases only the given user’s accounts for the data-deletion job', async () => {
+    const { prisma, service } = setup();
+    prisma.account.deleteMany.mockResolvedValue({ count: 2 });
+    await service.removeAllForUser('u1');
+    expect(prisma.account.deleteMany.mock.calls[0][0].where).toEqual({
+      userId: 'u1',
+    });
+  });
 });

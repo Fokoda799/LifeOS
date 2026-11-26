@@ -36,3 +36,30 @@ export function useRemoveTool() {
     onSuccess: () => qc.invalidateQueries({ queryKey: userToolsKey }),
   });
 }
+
+/** Every tool the user has used, including removed ones (for Settings). */
+export function useAllUserTools() {
+  return useQuery({
+    queryKey: [...userToolsKey, "all"],
+    queryFn: () => api<UserToolsResponse>("/users/me/tools?includeRemoved=true"),
+  });
+}
+
+// Both refresh every "user-tools" query, so the sidebar and Settings stay in step.
+export function useRequestDataDeletion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (toolId: ToolId) =>
+      api<UserTool>(`/users/me/tools/${toolId}/data-deletion`, { method: "POST" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: userToolsKey }),
+  });
+}
+
+export function useCancelDataDeletion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (toolId: ToolId) =>
+      api<void>(`/users/me/tools/${toolId}/data-deletion`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: userToolsKey }),
+  });
+}

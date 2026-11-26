@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { PreferencesForm } from "@/features/settings/preferences-form";
 import { ProfileForm } from "@/features/settings/profile-form";
 import { SettingsSection } from "@/features/settings/settings-section";
+import { DataSection } from "@/features/settings/data-section";
 
 export default function SettingsPage() {
   const t = useTranslations("Settings");
@@ -20,6 +21,7 @@ export default function SettingsPage() {
           <ThemeToggle />
         </div>
       </SettingsSection>
+      <DataSection />
     </div>
   );
 }

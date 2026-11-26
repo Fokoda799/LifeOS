@@ -94,4 +94,8 @@ export class AccountsService {
   ): Promise<Map<string, bigint>> {
     return Promise.resolve(new Map());
   }
+
+  async removeAllForUser(userId: string): Promise<void> {
+    await this.prisma.account.deleteMany({ where: { userId } });
+  }
 }
