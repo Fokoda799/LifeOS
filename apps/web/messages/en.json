@@ -182,6 +182,21 @@
     "currency": "Default currency",
     "currencyHint": "Used for new accounts. Existing accounts keep their own currency.",
     "appearanceTitle": "Appearance",
-    "appearanceDescription": "Choose how LifeOS looks on this device."
+    "appearanceDescription": "Choose how LifeOS looks on this device.",
+    "dataTitle": "Your data",
+    "dataDescription": "Delete everything you stored in a tool. It's kept for {days} days first, so you can change your mind.",
+    "dataNone": "Nothing stored yet",
+    "dataKept": "Your data is kept",
+    "dataPending": "Will be permanently deleted on {date}",
+    "dataPendingHint": "Adding {name} again cancels the deletion.",
+    "dataDelete": "Delete data…",
+    "dataCancel": "Cancel deletion",
+    "dataDeleteTitle": "Delete your {name} data?",
+    "dataDeleteDescription": "Everything you stored in {name} will be permanently deleted on {date}. Until then you can cancel. {name} will be removed from your sidebar.",
+    "dataConfirm": "Delete my data",
+    "dataSupport": "Need it deleted right away? Contact support.",
+    "toastScheduled": "Deletion scheduled for {date}.",
+    "toastCancelled": "Deletion cancelled. Your data is kept.",
+    "dataError": "Couldn't update your data. Try again."
   }
 }

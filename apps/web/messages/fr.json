@@ -182,6 +182,21 @@
     "currency": "Devise par défaut",
     "currencyHint": "Utilisée pour les nouveaux comptes. Les comptes existants gardent leur propre devise.",
     "appearanceTitle": "Apparence",
-    "appearanceDescription": "Choisissez l'apparence de LifeOS sur cet appareil."
+    "appearanceDescription": "Choisissez l'apparence de LifeOS sur cet appareil.",
+    "dataTitle": "Vos données",
+    "dataDescription": "Supprimez tout ce que vous avez enregistré dans un outil. Il est conservé {days} jours avant, pour que vous puissiez changer d'avis.",
+    "dataNone": "Rien d'enregistré pour l'instant",
+    "dataKept": "Vos données sont conservées",
+    "dataPending": "Sera définitivement supprimé le {date}",
+    "dataPendingHint": "Ajouter à nouveau {name} annule la suppression.",
+    "dataDelete": "Supprimer les données…",
+    "dataCancel": "Annuler la suppression",
+    "dataDeleteTitle": "Supprimer vos données {name} ?",
+    "dataDeleteDescription": "Tout ce que vous avez enregistré dans {name} sera définitivement supprimé le {date}. D'ici là, vous pouvez annuler. {name} sera retiré de votre barre latérale.",
+    "dataConfirm": "Supprimer mes données",
+    "dataSupport": "Besoin d'une suppression immédiate ? Contactez le support.",
+    "toastScheduled": "Suppression programmée pour le {date}.",
+    "toastCancelled": "Suppression annulée. Vos données sont conservées.",
+    "dataError": "Impossible de mettre à jour vos données. Réessayez."
   }
 }

@@ -182,6 +182,21 @@
     "currency": "العملة الافتراضية",
     "currencyHint": "تُستخدم للحسابات الجديدة. تحتفظ الحسابات الحالية بعملتها الخاصة.",
     "appearanceTitle": "المظهر",
-    "appearanceDescription": "اختر شكل LifeOS على هذا الجهاز."
+    "appearanceDescription": "اختر شكل LifeOS على هذا الجهاز.",
+    "dataTitle": "بياناتك",
+    "dataDescription": "احذف كل ما خزّنته في أداة. تُحفظ {days} يومًا أولًا لتتمكن من تغيير رأيك.",
+    "dataNone": "لا شيء مخزّن بعد",
+    "dataKept": "بياناتك محفوظة",
+    "dataPending": "ستُحذف نهائيًا في {date}",
+    "dataPendingHint": "إضافة {name} مرة أخرى تلغي الحذف.",
+    "dataDelete": "حذف البيانات…",
+    "dataCancel": "إلغاء الحذف",
+    "dataDeleteTitle": "حذف بيانات {name}؟",
+    "dataDeleteDescription": "سيُحذف كل ما خزّنته في {name} نهائيًا في {date}. يمكنك الإلغاء قبل ذلك. ستُزال {name} من الشريط الجانبي.",
+    "dataConfirm": "احذف بياناتي",
+    "dataSupport": "تحتاج إلى حذف فوري؟ تواصل مع الدعم.",
+    "toastScheduled": "تمت جدولة الحذف في {date}.",
+    "toastCancelled": "أُلغي الحذف. بياناتك محفوظة.",
+    "dataError": "تعذّر تحديث بياناتك. حاول مرة أخرى."
   }
 }

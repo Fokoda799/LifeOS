@@ -8,6 +8,7 @@ import { HealthController } from './health.controller.js';
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { MoneyModule } from './money/money.module.js';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MoneyModule } from './money/money.module.js';
     }),
     MoneyModule,
     PrismaModule,
+    ScheduleModule.forRoot(),
     UsersModule,
   ],
   controllers: [AppController, HealthController],

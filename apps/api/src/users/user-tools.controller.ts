@@ -1,6 +1,16 @@
-import { Controller, Delete, Get, HttpCode, Param, Put } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  listUserToolsQuerySchema,
   toolIdSchema,
   userToolSchema,
   userToolsResponseSchema,
@@ -17,10 +27,19 @@ export class UserToolsController {
   constructor(private readonly userTools: UserToolsService) {}
 
   @Get()
+  @ApiQuery({
+    name: 'includeRemoved',
+    required: false,
+    enum: ['true', 'false'],
+  })
   @ZodResponse(200, userToolsResponseSchema, 'Tools the user has added')
-  @ApiErrors(401)
-  async list(@CurrentUser() user: { id: string }) {
-    return { tools: await this.userTools.list(user.id) };
+  @ApiErrors(400, 401)
+  async list(
+    @CurrentUser() user: { id: string },
+    @Query(new ZodValidationPipe(listUserToolsQuerySchema))
+    query: { includeRemoved: boolean },
+  ) {
+    return { tools: await this.userTools.list(user.id, query.includeRemoved) };
   }
 
   @Put(':toolId')
@@ -41,5 +60,26 @@ export class UserToolsController {
     @Param('toolId', new ZodValidationPipe(toolIdSchema)) toolId: ToolId,
   ) {
     await this.userTools.remove(user.id, toolId);
+  }
+
+  @Post(':toolId/data-deletion')
+  @HttpCode(200)
+  @ZodResponse(200, userToolSchema, 'Deletion scheduled (idempotent)')
+  @ApiErrors(400, 401, 404)
+  requestDataDeletion(
+    @CurrentUser() user: { id: string },
+    @Param('toolId', new ZodValidationPipe(toolIdSchema)) toolId: ToolId,
+  ) {
+    return this.userTools.requestDataDeletion(user.id, toolId);
+  }
+
+  @Delete(':toolId/data-deletion')
+  @HttpCode(204)
+  @ApiErrors(400, 401)
+  async cancelDataDeletion(
+    @CurrentUser() user: { id: string },
+    @Param('toolId', new ZodValidationPipe(toolIdSchema)) toolId: ToolId,
+  ) {
+    await this.userTools.cancelDataDeletion(user.id, toolId);
   }
 }
