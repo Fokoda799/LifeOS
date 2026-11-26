@@ -71,7 +71,8 @@
     "passwordMin": "8 أحرف على الأقل",
     "tooLong": "طويل جدًا",
     "invalid": "قيمة غير صالحة",
-    "code": "أدخل الرمز المكون من 6 أرقام"
+    "code": "أدخل الرمز المكون من 6 أرقام",
+    "amount": "أدخل مبلغًا صحيحًا"
   },
   "Dashboard": { "welcome": "مرحبًا، {name}" },
   "Tools": {
@@ -198,5 +199,51 @@
     "toastScheduled": "تمت جدولة الحذف في {date}.",
     "toastCancelled": "أُلغي الحذف. بياناتك محفوظة.",
     "dataError": "تعذّر تحديث بياناتك. حاول مرة أخرى."
+  },
+  "Money": {
+    "accounts": {
+      "description": "المكان الذي يوجد فيه مالك: نقد وبنوك وادخار ومحافظ.",
+      "new": "حساب جديد",
+      "totalBalance": "الرصيد الإجمالي",
+      "emptyTitle": "لا توجد حسابات بعد",
+      "emptyDescription": "أضف حسابك الأول لتبدأ بتتبع أموالك.",
+      "archived": "المؤرشفة ({count})",
+      "edit": "تعديل",
+      "archive": "أرشفة",
+      "restore": "استعادة",
+      "delete": "حذف",
+      "actionsFor": "إجراءات {name}",
+      "createTitle": "حساب جديد",
+      "editTitle": "تعديل الحساب",
+      "dialogDescription": "الحساب هو مكان تحتفظ فيه بأموالك.",
+      "name": "الاسم",
+      "namePlaceholder": "مثال: محفظة نقدية",
+      "type": "النوع",
+      "currency": "العملة",
+      "currencyLocked": "لا يمكن تغيير العملة بعد إنشاء الحساب.",
+      "openingBalance": "الرصيد الافتتاحي",
+      "openingBalanceHint": "ما يحتويه الحساب اليوم. استخدم علامة الناقص للأموال التي عليك.",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ…",
+      "create": "إنشاء الحساب",
+      "creating": "جارٍ الإنشاء…",
+      "cancel": "إلغاء",
+      "toastCreated": "تم إنشاء الحساب.",
+      "toastSaved": "تم الحفظ.",
+      "toastArchived": "تمت أرشفة {name}.",
+      "toastRestored": "تمت استعادة {name}.",
+      "toastDeleted": "تم حذف {name}.",
+      "errorSave": "تعذّر حفظ الحساب. حاول مرة أخرى.",
+      "errorLoad": "تعذّر تحميل حساباتك.",
+      "deleteTitle": "حذف {name}؟",
+      "deleteDescription": "سيُحذف الحساب نهائيًا ولا يمكن التراجع عن ذلك. أرشفه بدلًا من ذلك لإخفائه والاحتفاظ بسجله.",
+      "types": {
+        "cash": "نقد",
+        "bank": "بنك",
+        "savings": "ادخار",
+        "credit_card": "بطاقة ائتمان",
+        "e_wallet": "محفظة إلكترونية"
+      }
+    }
   }
 }
