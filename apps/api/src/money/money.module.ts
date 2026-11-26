@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from '../users/users.module';
-import { AccountsController } from './accounts.controller';
-import { AccountsService } from './accounts.service';
+import { AccountsController } from './accounts/accounts.controller';
+import { AccountsService } from './accounts/accounts.service';
 import { MoneyDataPurger } from './money-data-purger';
-import { CategoriesController } from './categories.controller';
-import { CategoriesService } from './categories.service';
+import { CategoriesController } from './categories/categories.controller';
+import { CategoriesService } from './categories/categories.service';
 
 @Module({
   imports: [UsersModule],

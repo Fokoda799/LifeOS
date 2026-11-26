@@ -26,10 +26,10 @@ import {
   type CreateCategoryInput,
   type UpdateCategoryInput,
 } from '@lifeos/shared';
-import { CurrentUser } from '../auth/current-user.decorator';
-import { ApiErrors, ZodBody, ZodResponse } from '../common/openapi';
-import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { RequireTool } from '../users/tool-access';
+import { CurrentUser } from '../../auth/current-user.decorator';
+import { ApiErrors, ZodBody, ZodResponse } from '../../common/openapi';
+import { ZodValidationPipe } from '../../common/zod-validation.pipe';
+import { RequireTool } from '../../users/tools/tool-access';
 import { CategoriesService } from './categories.service';
 
 const idPipe = new ZodValidationPipe(categoryIdSchema);

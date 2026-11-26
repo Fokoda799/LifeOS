@@ -12,7 +12,7 @@ import {
   type CreateCategoryInput,
   type UpdateCategoryInput,
 } from '@lifeos/shared';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { sortCategories, toCategoryDto } from './categories.mapper';
 
 @Injectable()

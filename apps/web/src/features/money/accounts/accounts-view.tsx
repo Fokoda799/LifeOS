@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AccountCard } from "./account-card";
 import { AccountDialog } from "./account-dialog";
-import { Amount } from "./amount";
+import { Amount } from "../shared/amount";
 import { DeleteAccountDialog } from "./delete-account-dialog";
 import { useAccounts, useUpdateAccount } from "./use-accounts";
 

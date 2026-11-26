@@ -16,9 +16,9 @@ import {
   userToolsResponseSchema,
   type ToolId,
 } from '@lifeos/shared';
-import { ApiErrors, ZodResponse } from '../common/openapi';
-import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { CurrentUser } from '../auth/current-user.decorator';
+import { ApiErrors, ZodResponse } from '../../common/openapi';
+import { ZodValidationPipe } from '../../common/zod-validation.pipe';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { UserToolsService } from './user-tools.service';
 
 @ApiTags('users')

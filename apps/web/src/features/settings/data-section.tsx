@@ -27,7 +27,7 @@ export function DataSection() {
   const t = useTranslations("Settings");
   const { data } = useAllUserTools();
   const [confirming, setConfirming] = useState<Tool | null>(null);
-  const rows = new Map<ToolId, UserTool>(data?.tools.map((r: any) => [r.toolId, r] as const));
+  const rows = new Map<ToolId, UserTool>(data?.tools.map((r) => [r.toolId, r] as const));
 
   return (
     <SettingsSection

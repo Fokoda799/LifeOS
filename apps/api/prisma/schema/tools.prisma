@@ -1,0 +1,19 @@
+enum ToolId {
+  money
+  tasks
+  training
+} 
+
+model UserTool {
+  userId    String
+  toolId    ToolId
+  addedAt   DateTime  @default(now())
+  /// Set when the user removes the tool. The tool is hidden, its data is kept.
+  removedAt DateTime?
+  deletionScheduledFor DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, toolId])
+  @@index([deletionScheduledFor])
+  @@map("user_tools")
+}

@@ -1,7 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ToolDataRegistry, type ToolDataPurger } from '../users/tool-data';
-import { AccountsService } from './accounts.service';
-import { CategoriesService } from './categories.service';
+import {
+  ToolDataRegistry,
+  type ToolDataPurger,
+} from '../users/tools/tool-data';
+import { AccountsService } from './accounts/accounts.service';
+import { CategoriesService } from './categories/categories.service';
 
 @Injectable()
 export class MoneyDataPurger implements ToolDataPurger, OnModuleInit {

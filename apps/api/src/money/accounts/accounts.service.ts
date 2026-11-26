@@ -4,8 +4,8 @@ import type {
   CreateAccountInput,
   UpdateAccountInput,
 } from '@lifeos/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { UsersService } from '../users/users.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { UsersService } from '../../users/users.service';
 import { toAccountDto } from './accounts.mapper';
 
 @Injectable()
