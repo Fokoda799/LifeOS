@@ -20,6 +20,7 @@ model User {
   emailVerifiedAt DateTime?
   tools       UserTool[]
   accounts Account[]
+  categories Category[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -111,4 +112,30 @@ model Account {
 
   @@index([userId, archivedAt])
   @@map("accounts")
+}
+
+enum CategoryKind {
+  expense
+  income
+}
+
+model Category {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind       CategoryKind
+  /// Set on the user's copy of a default category (the translation key). Null for custom ones.
+  systemKey  String?
+  /// Custom name or a rename of a default. Null on an untouched default.
+  name       String?
+  icon       String
+  color      String
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  // Postgres treats NULLs as distinct, so custom categories (systemKey null) are unaffected.
+  @@unique([userId, systemKey])
+  @@index([userId, kind, archivedAt])
+  @@map("categories")
 }
