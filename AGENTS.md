@@ -60,6 +60,7 @@ API docs (development only): http://localhost:4000/docs, spec at /docs-json.
 - **Errors:** everything goes through `AllExceptionsFilter` and returns `{ statusCode, error, message, errors?, path, timestamp }`. Throw Nest `HttpException`s.
 - **Ownership:** every query on user data must filter by the authenticated user's id. No exceptions.
 - - Accounts are created only through the email-verified flow: `register/start → verify → complete`. Password reset is `password/forgot → verify → reset` and revokes every session. `start` endpoints always answer 202 (no account enumeration). Dev mail goes to Mailpit (`localhost:8025`); production uses SMTP env vars (`MAIL_*`).
+- **Deleting tool data.** Settings → "Your data" schedules a deletion (`UserTool.deletionScheduledFor`, 30 days, `TOOL_DATA_GRACE_DAYS`) and hides the tool; a daily job (03:00 UTC, `ToolDataPurgeService`) erases it. Every tool module that stores user data must register a `ToolDataPurger` (see `MoneyDataPurger`) that deletes ALL of that user's data for the tool, children before parents. When you add a table to a tool, add it to that tool's purger. Without a purger the job skips the tool and logs a warning. Re-adding a tool cancels a pending deletion.
 
 ## Money rules (non-negotiable)
 
