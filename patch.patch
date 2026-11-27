@@ -1,0 +1,278 @@
+diff --git a/apps/web/messages/ar.json b/apps/web/messages/ar.json
+index 69637f6..cec548b 100644
+--- a/apps/web/messages/ar.json
++++ b/apps/web/messages/ar.json
+@@ -276,8 +276,11 @@
+       "typeLocked": "لا يمكن تغيير النوع بعد إنشاء الفئة.",
+       "icon": "الأيقونة",
+       "emojiTitle": "أو اختر رمزاً تعبيرياً",
+-      "emojiInput": "اكتب رمزاً تعبيرياً أو الصقه",
+-      "emojiHint": "استخدم لوحة الرموز التعبيرية في لوحة المفاتيح أو الصق رمزاً.",
++      "emojiChoose": "اختر رمزاً تعبيرياً",
++      "emojiChange": "تغيير الرمز التعبيري",
++      "emojiSearch": "ابحث عن رمز تعبيري…",
++      "emojiLoading": "جارٍ تحميل الرموز التعبيرية…",
++      "emojiEmpty": "لم يُعثر على رمز تعبيري.",
+       "color": "اللون",
+       "save": "حفظ",
+       "saving": "جارٍ الحفظ…",
+diff --git a/apps/web/messages/en.json b/apps/web/messages/en.json
+index 79a27d2..ff1f0d6 100644
+--- a/apps/web/messages/en.json
++++ b/apps/web/messages/en.json
+@@ -276,8 +276,11 @@
+       "typeLocked": "The type can't be changed after the category is created.",
+       "icon": "Icon",
+       "emojiTitle": "Or pick an emoji",
+-      "emojiInput": "Type or paste an emoji",
+-      "emojiHint": "Use your keyboard's emoji picker, or paste one.",
++      "emojiChoose": "Choose an emoji",
++      "emojiChange": "Change emoji",
++      "emojiSearch": "Search emoji…",
++      "emojiLoading": "Loading emoji…",
++      "emojiEmpty": "No emoji found.",
+       "color": "Color",
+       "save": "Save",
+       "saving": "Saving…",
+diff --git a/apps/web/messages/fr.json b/apps/web/messages/fr.json
+index ea97e7e..9cadd47 100644
+--- a/apps/web/messages/fr.json
++++ b/apps/web/messages/fr.json
+@@ -276,8 +276,11 @@
+       "typeLocked": "Le type ne peut plus être modifié une fois la catégorie créée.",
+       "icon": "Icône",
+       "emojiTitle": "Ou choisissez un emoji",
+-      "emojiInput": "Saisissez ou collez un emoji",
+-      "emojiHint": "Utilisez le sélecteur d'emojis de votre clavier ou collez-en un.",
++      "emojiChoose": "Choisir un emoji",
++      "emojiChange": "Changer d'emoji",
++      "emojiSearch": "Rechercher un emoji…",
++      "emojiLoading": "Chargement des emojis…",
++      "emojiEmpty": "Aucun emoji trouvé.",
+       "color": "Couleur",
+       "save": "Enregistrer",
+       "saving": "Enregistrement…",
+diff --git a/apps/web/src/features/money/categories/category-dialog.tsx b/apps/web/src/features/money/categories/category-dialog.tsx
+index d2c68f4..3a7f15c 100644
+--- a/apps/web/src/features/money/categories/category-dialog.tsx
++++ b/apps/web/src/features/money/categories/category-dialog.tsx
+@@ -7,11 +7,11 @@ import {
+   MAX_CATEGORIES_PER_USER,
+   categoryColorSchema,
+   categoryIconSchema,
+-  emojiSchema,
+   categoryKindSchema,
+   type Category,
+   type CategoryKind,
+ } from "@lifeos/shared";
++import { Smile } from "lucide-react";
+ import { useTranslations } from "next-intl";
+ import { useForm, useWatch } from "react-hook-form";
+ import { useState } from "react";
+@@ -26,13 +26,11 @@ import {
+   DialogHeader,
+   DialogTitle,
+ } from "@/components/ui/dialog";
+-import { Input } from "@/components/ui/input";
+-import { Label } from "@/components/ui/label";
+ import { validationKey } from "@/features/auth/errors";
+ import { FormField } from "@/features/auth/form-field";
+ import { ApiRequestError } from "@/lib/api";
+ import { categoryColorClasses, categoryIcons, isIconKey } from "./category-style";
+-import { EMOJI_PRESETS } from "./emoji-presets";
++import { EmojiPicker } from "./emoji-picker";
+ import { useCategoryName, useCreateCategory, useUpdateCategory } from "./use-categories";
+ 
+ const schema = z.object({
+@@ -116,18 +114,10 @@ function CategoryForm({
+ 
+   const nameKey = validationKey(errors.name);
+   const icon = useWatch({ control, name: "icon" });
+-  const [emojiText, setEmojiText] = useState(isIconKey(icon) ? "" : icon);
++  const [pickerOpen, setPickerOpen] = useState(false);
+ 
+   function pickIcon(value: string) {
+     setValue("icon", value, { shouldDirty: true });
+-    setEmojiText(isIconKey(value) ? "" : value);
+-  }
+-
+-  // Keep only the last emoji typed or pasted; ignore anything that isn't one.
+-  function onEmojiInput(text: string) {
+-    const last = [...new Intl.Segmenter().segment(text)].pop()?.segment ?? "";
+-    if (emojiSchema.safeParse(last).success) pickIcon(last);
+-    else if (text === "") setEmojiText("");
+   }
+ 
+   const onSubmit = handleSubmit((values) => {
+@@ -220,35 +210,30 @@ function CategoryForm({
+         </div>
+ 
+         <p className="text-sm font-bold text-muted-foreground">{t("emojiTitle")}</p>
+-        <div className="grid grid-cols-8 gap-2">
+-          {EMOJI_PRESETS.map((value) => (
+-            <button
+-              key={value}
+-              type="button"
+-              aria-pressed={icon === value}
+-              onClick={() => pickIcon(value)}
+-              className={`${choice} aspect-square text-xl leading-none ${icon === value ? selected : ""}`}
+-            >
+-              {value}
+-            </button>
+-          ))}
+-        </div>
+-        <div className="grid gap-2">
+-          <Label htmlFor="emoji">{t("emojiInput")}</Label>
+-          <Input
+-            id="emoji"
+-            dir="ltr"
+-            autoComplete="off"
+-            value={emojiText}
+-            placeholder="🙂"
+-            aria-describedby="emoji-hint"
+-            onChange={(e) => onEmojiInput(e.target.value)}
+-            className="w-24 text-center text-xl"
++        <Button
++          type="button"
++          variant="outline"
++          aria-expanded={pickerOpen}
++          onClick={() => setPickerOpen((open) => !open)}
++          className="justify-start"
++        >
++          {isIconKey(icon) ? (
++            <Smile aria-hidden />
++          ) : (
++            <span aria-hidden className="text-xl leading-none">
++              {icon}
++            </span>
++          )}
++          {isIconKey(icon) ? t("emojiChoose") : t("emojiChange")}
++        </Button>
++        {pickerOpen && (
++          <EmojiPicker
++            onSelect={(emoji) => {
++              pickIcon(emoji);
++              setPickerOpen(false);
++            }}
+           />
+-          <p id="emoji-hint" className="text-sm text-muted-foreground">
+-            {t("emojiHint")}
+-          </p>
+-        </div>
++        )}
+       </fieldset>
+ 
+       <fieldset className="grid gap-2">
+diff --git a/apps/web/src/features/money/categories/emoji-picker.tsx b/apps/web/src/features/money/categories/emoji-picker.tsx
+new file mode 100644
+index 0000000..57169e4
+--- /dev/null
++++ b/apps/web/src/features/money/categories/emoji-picker.tsx
+@@ -0,0 +1,66 @@
++"use client";
++
++import { EmojiPicker as Picker } from "frimousse";
++import { useLocale, useTranslations } from "next-intl";
++
++/**
++ * Searchable emoji picker (frimousse, unstyled), styled with our tokens.
++ * Emoji data comes from the Emojibase CDN and has English and French names;
++ * Arabic users get the English search names.
++ */
++export function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
++  const t = useTranslations("Money.categories");
++  const locale = useLocale();
++
++  return (
++    <Picker.Root
++      locale={locale === "fr" ? "fr" : "en"}
++      columns={8}
++      onEmojiSelect={({ emoji }) => onSelect(emoji)}
++      // Enter in the search box must not submit the surrounding form.
++      onKeyDownCapture={(e) => e.key === "Enter" && e.preventDefault()}
++      className="flex h-72 w-full flex-col rounded-2xl border-2 border-border bg-card"
++    >
++      <Picker.Search
++        autoFocus
++        aria-label={t("emojiSearch")}
++        placeholder={t("emojiSearch")}
++        className="m-2 h-10 rounded-xl border-2 border-input bg-muted px-3 text-sm outline-none focus-visible:border-ring focus-visible:bg-background"
++      />
++      <Picker.Viewport className="min-h-0 flex-1 outline-none">
++        <Picker.Loading className="grid h-full place-items-center text-sm text-muted-foreground">
++          {t("emojiLoading")}
++        </Picker.Loading>
++        <Picker.Empty className="grid h-full place-items-center text-sm text-muted-foreground">
++          {t("emojiEmpty")}
++        </Picker.Empty>
++        <Picker.List
++          components={{
++            CategoryHeader: ({ category, ...props }) => (
++              <div
++                {...props}
++                className="bg-card px-3 pt-3 pb-1.5 text-xs font-bold text-muted-foreground"
++              >
++                {category.label}
++              </div>
++            ),
++            Row: ({ children, ...props }) => (
++              <div {...props} className="scroll-my-1.5 px-1.5">
++                {children}
++              </div>
++            ),
++            Emoji: ({ emoji, ...props }) => (
++              <button
++                {...props}
++                type="button"
++                className="flex size-9 items-center justify-center rounded-lg text-xl data-[active]:bg-accent"
++              >
++                {emoji.emoji}
++              </button>
++            ),
++          }}
++        />
++      </Picker.Viewport>
++    </Picker.Root>
++  );
++}
+diff --git a/apps/web/src/features/money/categories/emoji-presets.ts b/apps/web/src/features/money/categories/emoji-presets.ts
+deleted file mode 100644
+index 29cd3b0..0000000
+--- a/apps/web/src/features/money/categories/emoji-presets.ts
++++ /dev/null
+@@ -1,35 +0,0 @@
+-/** Quick picks for the category dialog. Any other emoji can be typed or pasted. */
+-export const EMOJI_PRESETS = [
+-  "🛒",
+-  "🍔",
+-  "☕",
+-  "🍕",
+-  "🚗",
+-  "⛽",
+-  "🏠",
+-  "💡",
+-  "📱",
+-  "👕",
+-  "🎮",
+-  "🎬",
+-  "✈️",
+-  "🏖️",
+-  "💊",
+-  "🏋️",
+-  "📚",
+-  "🎓",
+-  "👶",
+-  "🐶",
+-  "🎁",
+-  "💼",
+-  "💻",
+-  "📈",
+-  "💰",
+-  "🏦",
+-  "🧾",
+-  "🔧",
+-  "💇",
+-  "🎵",
+-  "🕌",
+-  "🤲",
+-] as const;

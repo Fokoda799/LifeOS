@@ -4,7 +4,10 @@ export const CATEGORY_KINDS = ["expense", "income"] as const;
 export const categoryKindSchema = z.enum(CATEGORY_KINDS);
 export type CategoryKind = z.infer<typeof categoryKindSchema>;
 
-/** Icon and color are keys, not raw values: the web app maps them to lucide icons and theme tokens. */
+/**
+ * An icon is either one of these keys (the web app maps them to lucide icons) or a single
+ * emoji. Colors are keys too: the web app maps them to theme tokens.
+ */
 export const CATEGORY_ICONS = [
   "cart",
   "food",
@@ -31,8 +34,26 @@ export const CATEGORY_ICONS = [
   "pet",
   "coffee",
 ] as const;
-export const categoryIconSchema = z.enum(CATEGORY_ICONS);
-export type CategoryIcon = z.infer<typeof categoryIconSchema>;
+export const categoryIconKeySchema = z.enum(CATEGORY_ICONS);
+export type CategoryIconKey = z.infer<typeof categoryIconKeySchema>;
+
+const EMOJI = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u;
+
+/** True for exactly one emoji (one grapheme, so skin tones, flags and ZWJ sequences count as one). */
+export function isSingleEmoji(value: string): boolean {
+  if (value.length === 0 || value.length > 32 || !EMOJI.test(value)) return false;
+  let count = 0;
+  for (const _ of new Intl.Segmenter().segment(value)) {
+    if (++count > 1) return false;
+  }
+  return count === 1;
+}
+
+export const emojiSchema = z.string().refine(isSingleEmoji);
+
+export const categoryIconSchema = z.union([categoryIconKeySchema, emojiSchema]);
+/** An icon key or an emoji. */
+export type CategoryIcon = string;
 
 export const CATEGORY_COLORS = [
   "teal",
@@ -59,7 +80,7 @@ export const MAX_CATEGORIES_PER_USER = 100;
 export const DEFAULT_CATEGORIES: readonly {
   key: string;
   kind: CategoryKind;
-  icon: CategoryIcon;
+  icon: CategoryIconKey;
   color: CategoryColor;
 }[] = [
   { key: "groceries", kind: "expense", icon: "cart", color: "green" },

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   PiggyBank,
   Settings,
+  Tags,
   Target,
   TrendingUp,
   Wallet,
@@ -17,6 +18,7 @@ export type NavKey =
   | "settings"
   | "overview"
   | "accounts"
+  | "categories"
   | "transactions"
   | "budgets"
   | "goals"
@@ -36,6 +38,7 @@ export const toolNav: Partial<Record<ToolId, readonly NavItem[]>> = {
   money: [
     { key: "overview", href: "/money", icon: Wallet, enabled: true },
     { key: "accounts", href: "/money/accounts", icon: Landmark, enabled: true },
+    { key: "categories", href: "/money/categories", icon: Tags, enabled: true },
     { key: "transactions", href: "/money/transactions", icon: ArrowLeftRight, enabled: false },
     { key: "budgets", href: "/money/budgets", icon: PiggyBank, enabled: false },
     { key: "goals", href: "/money/goals", icon: Target, enabled: false },
