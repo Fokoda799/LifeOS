@@ -1,12 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   Account,
   CreateAccountInput,
+  TransactionType,
   UpdateAccountInput,
 } from '@lifeos/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UsersService } from '../../users/users.service';
+import { computeDeltas } from '../transactions/balance';
 import { toAccountDto } from './accounts.mapper';
+
+type OutgoingRow = {
+  accountId: string;
+  type: TransactionType;
+  _sum: { amount: bigint | null };
+};
+type IncomingRow = {
+  toAccountId: string | null;
+  _sum: { amount: bigint | null };
+};
 
 @Injectable()
 export class AccountsService {
@@ -74,7 +90,14 @@ export class AccountsService {
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    // P2-03: refuse with 409 when the account has transactions (archive instead).
+    const used = await this.prisma.transaction.count({
+      where: { userId, OR: [{ accountId: id }, { toAccountId: id }] },
+    });
+    if (used > 0) {
+      throw new ConflictException(
+        'This account has transactions. Archive it instead.',
+      );
+    }
     const { count } = await this.prisma.account.deleteMany({
       where: { id, userId },
     });
@@ -87,12 +110,36 @@ export class AccountsService {
     return row;
   }
 
-  /** Sum of each account's transactions. Empty until P2-07 adds the real query. */
-  private deltas(
-    _userId: string,
-    _accountIds: string[],
+  /** What each account's transactions add to its opening balance (see computeDeltas). */
+  private async deltas(
+    userId: string,
+    accountIds: string[],
   ): Promise<Map<string, bigint>> {
-    return Promise.resolve(new Map());
+    if (accountIds.length === 0) return new Map();
+    const [outgoing, incoming] = await Promise.all([
+      this.prisma.transaction.groupBy({
+        by: ['accountId', 'type'],
+        where: { userId, accountId: { in: accountIds } },
+        _sum: { amount: true },
+      }),
+      this.prisma.transaction.groupBy({
+        by: ['toAccountId'],
+        where: { userId, toAccountId: { in: accountIds } },
+        _sum: { amount: true },
+      }),
+    ]);
+    return computeDeltas(
+      outgoing.map((r: OutgoingRow) => ({
+        accountId: r.accountId,
+        type: r.type,
+        sum: r._sum.amount ?? 0n,
+      })),
+      incoming.flatMap((r: IncomingRow) =>
+        r.toAccountId
+          ? [{ accountId: r.toAccountId, sum: r._sum.amount ?? 0n }]
+          : [],
+      ),
+    );
   }
 
   async removeAllForUser(userId: string): Promise<void> {

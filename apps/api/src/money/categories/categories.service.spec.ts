@@ -30,6 +30,7 @@ function setup() {
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
+    transaction: { count: vi.fn().mockResolvedValue(0) },
   };
   return { prisma, service: new CategoriesService(prisma as never) };
 }
@@ -175,6 +176,20 @@ describe('CategoriesService', () => {
       id: 'c1',
       userId: 'u1',
     });
+  });
+
+  it('refuses to delete a category that has transactions', async () => {
+    const { prisma, service } = setup();
+    prisma.category.findFirst.mockResolvedValue(row());
+    prisma.transaction.count.mockResolvedValueOnce(2);
+    await expect(service.remove('u1', 'c1')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(prisma.transaction.count.mock.calls[0][0].where).toEqual({
+      userId: 'u1',
+      categoryId: 'c1',
+    });
+    expect(prisma.category.deleteMany).not.toHaveBeenCalled();
   });
 
   it('erases all of a user’s categories for the data-deletion job', async () => {

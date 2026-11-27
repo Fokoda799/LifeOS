@@ -19,6 +19,9 @@ model Account {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
+  transactions      Transaction[] @relation("TransactionAccount")
+  incomingTransfers Transaction[] @relation("TransactionToAccount")
+
   @@index([userId, archivedAt])
   @@map("accounts")
 }
@@ -42,8 +45,46 @@ model Category {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
+  transactions Transaction[]
+
   // Postgres treats NULLs as distinct, so custom categories (systemKey null) are unaffected.
   @@unique([userId, systemKey])
   @@index([userId, kind, archivedAt])
   @@map("categories")
+}
+
+enum TransactionType {
+  income
+  expense
+  transfer
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  /// Plain id: tools never relate to User.
+  userId      String
+  type        TransactionType
+  /// Minor units, always greater than zero. The type gives the direction.
+  amount      BigInt
+  /// ISO 4217, copied from the account when the transaction is saved.
+  currency    String
+  accountId   String
+  account     Account         @relation("TransactionAccount", fields: [accountId], references: [id], onDelete: Restrict)
+  /// Destination of a transfer, null otherwise.
+  toAccountId String?
+  toAccount   Account?        @relation("TransactionToAccount", fields: [toAccountId], references: [id], onDelete: Restrict)
+  /// Income and expense only.
+  categoryId  String?
+  category    Category?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// A calendar day, no time of day.
+  date        DateTime        @db.Date
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([userId, date(sort: Desc)])
+  @@index([accountId])
+  @@index([toAccountId])
+  @@index([categoryId])
+  @@map("transactions")
 }

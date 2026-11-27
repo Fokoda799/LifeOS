@@ -1,278 +1,1296 @@
-diff --git a/apps/web/messages/ar.json b/apps/web/messages/ar.json
-index 69637f6..cec548b 100644
---- a/apps/web/messages/ar.json
-+++ b/apps/web/messages/ar.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "لا يمكن تغيير النوع بعد إنشاء الفئة.",
-       "icon": "الأيقونة",
-       "emojiTitle": "أو اختر رمزاً تعبيرياً",
--      "emojiInput": "اكتب رمزاً تعبيرياً أو الصقه",
--      "emojiHint": "استخدم لوحة الرموز التعبيرية في لوحة المفاتيح أو الصق رمزاً.",
-+      "emojiChoose": "اختر رمزاً تعبيرياً",
-+      "emojiChange": "تغيير الرمز التعبيري",
-+      "emojiSearch": "ابحث عن رمز تعبيري…",
-+      "emojiLoading": "جارٍ تحميل الرموز التعبيرية…",
-+      "emojiEmpty": "لم يُعثر على رمز تعبيري.",
-       "color": "اللون",
-       "save": "حفظ",
-       "saving": "جارٍ الحفظ…",
-diff --git a/apps/web/messages/en.json b/apps/web/messages/en.json
-index 79a27d2..ff1f0d6 100644
---- a/apps/web/messages/en.json
-+++ b/apps/web/messages/en.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "The type can't be changed after the category is created.",
-       "icon": "Icon",
-       "emojiTitle": "Or pick an emoji",
--      "emojiInput": "Type or paste an emoji",
--      "emojiHint": "Use your keyboard's emoji picker, or paste one.",
-+      "emojiChoose": "Choose an emoji",
-+      "emojiChange": "Change emoji",
-+      "emojiSearch": "Search emoji…",
-+      "emojiLoading": "Loading emoji…",
-+      "emojiEmpty": "No emoji found.",
-       "color": "Color",
-       "save": "Save",
-       "saving": "Saving…",
-diff --git a/apps/web/messages/fr.json b/apps/web/messages/fr.json
-index ea97e7e..9cadd47 100644
---- a/apps/web/messages/fr.json
-+++ b/apps/web/messages/fr.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "Le type ne peut plus être modifié une fois la catégorie créée.",
-       "icon": "Icône",
-       "emojiTitle": "Ou choisissez un emoji",
--      "emojiInput": "Saisissez ou collez un emoji",
--      "emojiHint": "Utilisez le sélecteur d'emojis de votre clavier ou collez-en un.",
-+      "emojiChoose": "Choisir un emoji",
-+      "emojiChange": "Changer d'emoji",
-+      "emojiSearch": "Rechercher un emoji…",
-+      "emojiLoading": "Chargement des emojis…",
-+      "emojiEmpty": "Aucun emoji trouvé.",
-       "color": "Couleur",
-       "save": "Enregistrer",
-       "saving": "Enregistrement…",
-diff --git a/apps/web/src/features/money/categories/category-dialog.tsx b/apps/web/src/features/money/categories/category-dialog.tsx
-index d2c68f4..3a7f15c 100644
---- a/apps/web/src/features/money/categories/category-dialog.tsx
-+++ b/apps/web/src/features/money/categories/category-dialog.tsx
-@@ -7,11 +7,11 @@ import {
-   MAX_CATEGORIES_PER_USER,
-   categoryColorSchema,
-   categoryIconSchema,
--  emojiSchema,
-   categoryKindSchema,
-   type Category,
-   type CategoryKind,
- } from "@lifeos/shared";
-+import { Smile } from "lucide-react";
- import { useTranslations } from "next-intl";
- import { useForm, useWatch } from "react-hook-form";
- import { useState } from "react";
-@@ -26,13 +26,11 @@ import {
-   DialogHeader,
-   DialogTitle,
- } from "@/components/ui/dialog";
--import { Input } from "@/components/ui/input";
--import { Label } from "@/components/ui/label";
- import { validationKey } from "@/features/auth/errors";
- import { FormField } from "@/features/auth/form-field";
- import { ApiRequestError } from "@/lib/api";
- import { categoryColorClasses, categoryIcons, isIconKey } from "./category-style";
--import { EMOJI_PRESETS } from "./emoji-presets";
-+import { EmojiPicker } from "./emoji-picker";
- import { useCategoryName, useCreateCategory, useUpdateCategory } from "./use-categories";
+diff --git a/apps/api/src/money/accounts/accounts.service.spec.ts b/apps/api/src/money/accounts/accounts.service.spec.ts
+index 0e1e587..f7fafb8 100644
+--- a/apps/api/src/money/accounts/accounts.service.spec.ts
++++ b/apps/api/src/money/accounts/accounts.service.spec.ts
+@@ -1,4 +1,4 @@
+-import { NotFoundException } from '@nestjs/common';
++import { ConflictException, NotFoundException } from '@nestjs/common';
+ import { AccountsService } from './accounts.service';
  
- const schema = z.object({
-@@ -116,18 +114,10 @@ function CategoryForm({
+ const row = (over = {}) => ({
+@@ -22,6 +22,10 @@ function setup() {
+       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+       deleteMany: vi.fn(),
+     },
++    transaction: {
++      count: vi.fn().mockResolvedValue(0),
++      groupBy: vi.fn().mockResolvedValue([]),
++    },
+   };
+   const users = { findById: vi.fn().mockResolvedValue({ currency: 'EUR' }) };
+   const service = new AccountsService(prisma as never, users as never);
+@@ -122,6 +126,37 @@ describe('AccountsService', () => {
+     );
+   });
  
-   const nameKey = validationKey(errors.name);
-   const icon = useWatch({ control, name: "icon" });
--  const [emojiText, setEmojiText] = useState(isIconKey(icon) ? "" : icon);
-+  const [pickerOpen, setPickerOpen] = useState(false);
++  it('refuses to delete an account that has transactions', async () => {
++    const { prisma, service } = setup();
++    prisma.transaction.count.mockResolvedValueOnce(3);
++    await expect(service.remove('u1', 'c1')).rejects.toBeInstanceOf(
++      ConflictException,
++    );
++    expect(prisma.transaction.count.mock.calls[0][0].where).toEqual({
++      userId: 'u1',
++      OR: [{ accountId: 'c1' }, { toAccountId: 'c1' }],
++    });
++    expect(prisma.account.deleteMany).not.toHaveBeenCalled();
++  });
++
++  it('computes the balance from the opening balance and the transactions', async () => {
++    const { prisma, service } = setup();
++    prisma.account.findMany.mockResolvedValue([
++      row({ openingBalance: 10_000n }),
++    ]);
++    prisma.transaction.groupBy
++      .mockResolvedValueOnce([
++        { accountId: 'c1', type: 'income', _sum: { amount: 5_000n } },
++        { accountId: 'c1', type: 'expense', _sum: { amount: 1_200n } },
++        { accountId: 'c1', type: 'transfer', _sum: { amount: 800n } },
++      ])
++      .mockResolvedValueOnce([{ toAccountId: 'c1', _sum: { amount: 300n } }]);
++    const [account] = await service.list('u1', false);
++    expect(account.openingBalance).toBe('10000');
++    expect(account.balance).toBe('13300'); // 10000 + 5000 - 1200 - 800 + 300
++    expect(prisma.transaction.groupBy.mock.calls[0][0].where.userId).toBe('u1');
++  });
++
+   it('erases only the given user’s accounts for the data-deletion job', async () => {
+     const { prisma, service } = setup();
+     prisma.account.deleteMany.mockResolvedValue({ count: 2 });
+diff --git a/apps/api/src/money/accounts/accounts.service.ts b/apps/api/src/money/accounts/accounts.service.ts
+index 1377fa1..1828d52 100644
+--- a/apps/api/src/money/accounts/accounts.service.ts
++++ b/apps/api/src/money/accounts/accounts.service.ts
+@@ -1,13 +1,29 @@
+-import { Injectable, NotFoundException } from '@nestjs/common';
++import {
++  ConflictException,
++  Injectable,
++  NotFoundException,
++} from '@nestjs/common';
+ import type {
+   Account,
+   CreateAccountInput,
++  TransactionType,
+   UpdateAccountInput,
+ } from '@lifeos/shared';
+ import { PrismaService } from '../../prisma/prisma.service';
+ import { UsersService } from '../../users/users.service';
++import { computeDeltas } from '../transactions/balance';
+ import { toAccountDto } from './accounts.mapper';
  
-   function pickIcon(value: string) {
-     setValue("icon", value, { shouldDirty: true });
--    setEmojiText(isIconKey(value) ? "" : value);
--  }
--
--  // Keep only the last emoji typed or pasted; ignore anything that isn't one.
--  function onEmojiInput(text: string) {
--    const last = [...new Intl.Segmenter().segment(text)].pop()?.segment ?? "";
--    if (emojiSchema.safeParse(last).success) pickIcon(last);
--    else if (text === "") setEmojiText("");
++type OutgoingRow = {
++  accountId: string;
++  type: TransactionType;
++  _sum: { amount: bigint | null };
++};
++type IncomingRow = {
++  toAccountId: string | null;
++  _sum: { amount: bigint | null };
++};
++
+ @Injectable()
+ export class AccountsService {
+   constructor(
+@@ -74,7 +90,14 @@ export class AccountsService {
    }
  
-   const onSubmit = handleSubmit((values) => {
-@@ -220,35 +210,30 @@ function CategoryForm({
-         </div>
+   async remove(userId: string, id: string): Promise<void> {
+-    // P2-03: refuse with 409 when the account has transactions (archive instead).
++    const used = await this.prisma.transaction.count({
++      where: { userId, OR: [{ accountId: id }, { toAccountId: id }] },
++    });
++    if (used > 0) {
++      throw new ConflictException(
++        'This account has transactions. Archive it instead.',
++      );
++    }
+     const { count } = await this.prisma.account.deleteMany({
+       where: { id, userId },
+     });
+@@ -87,12 +110,36 @@ export class AccountsService {
+     return row;
+   }
  
-         <p className="text-sm font-bold text-muted-foreground">{t("emojiTitle")}</p>
--        <div className="grid grid-cols-8 gap-2">
--          {EMOJI_PRESETS.map((value) => (
--            <button
--              key={value}
--              type="button"
--              aria-pressed={icon === value}
--              onClick={() => pickIcon(value)}
--              className={`${choice} aspect-square text-xl leading-none ${icon === value ? selected : ""}`}
--            >
--              {value}
--            </button>
--          ))}
--        </div>
--        <div className="grid gap-2">
--          <Label htmlFor="emoji">{t("emojiInput")}</Label>
--          <Input
--            id="emoji"
--            dir="ltr"
--            autoComplete="off"
--            value={emojiText}
--            placeholder="🙂"
--            aria-describedby="emoji-hint"
--            onChange={(e) => onEmojiInput(e.target.value)}
--            className="w-24 text-center text-xl"
-+        <Button
-+          type="button"
-+          variant="outline"
-+          aria-expanded={pickerOpen}
-+          onClick={() => setPickerOpen((open) => !open)}
-+          className="justify-start"
-+        >
-+          {isIconKey(icon) ? (
-+            <Smile aria-hidden />
-+          ) : (
-+            <span aria-hidden className="text-xl leading-none">
-+              {icon}
-+            </span>
-+          )}
-+          {isIconKey(icon) ? t("emojiChoose") : t("emojiChange")}
-+        </Button>
-+        {pickerOpen && (
-+          <EmojiPicker
-+            onSelect={(emoji) => {
-+              pickIcon(emoji);
-+              setPickerOpen(false);
-+            }}
-           />
--          <p id="emoji-hint" className="text-sm text-muted-foreground">
--            {t("emojiHint")}
--          </p>
--        </div>
-+        )}
-       </fieldset>
+-  /** Sum of each account's transactions. Empty until P2-07 adds the real query. */
+-  private deltas(
+-    _userId: string,
+-    _accountIds: string[],
++  /** What each account's transactions add to its opening balance (see computeDeltas). */
++  private async deltas(
++    userId: string,
++    accountIds: string[],
+   ): Promise<Map<string, bigint>> {
+-    return Promise.resolve(new Map());
++    if (accountIds.length === 0) return new Map();
++    const [outgoing, incoming] = await Promise.all([
++      this.prisma.transaction.groupBy({
++        by: ['accountId', 'type'],
++        where: { userId, accountId: { in: accountIds } },
++        _sum: { amount: true },
++      }),
++      this.prisma.transaction.groupBy({
++        by: ['toAccountId'],
++        where: { userId, toAccountId: { in: accountIds } },
++        _sum: { amount: true },
++      }),
++    ]);
++    return computeDeltas(
++      outgoing.map((r: OutgoingRow) => ({
++        accountId: r.accountId,
++        type: r.type,
++        sum: r._sum.amount ?? 0n,
++      })),
++      incoming.flatMap((r: IncomingRow) =>
++        r.toAccountId
++          ? [{ accountId: r.toAccountId, sum: r._sum.amount ?? 0n }]
++          : [],
++      ),
++    );
+   }
  
-       <fieldset className="grid gap-2">
-diff --git a/apps/web/src/features/money/categories/emoji-picker.tsx b/apps/web/src/features/money/categories/emoji-picker.tsx
-new file mode 100644
-index 0000000..57169e4
---- /dev/null
-+++ b/apps/web/src/features/money/categories/emoji-picker.tsx
-@@ -0,0 +1,66 @@
-+"use client";
+   async removeAllForUser(userId: string): Promise<void> {
+diff --git a/apps/api/src/money/categories/categories.service.spec.ts b/apps/api/src/money/categories/categories.service.spec.ts
+index 57e8c0d..0a7cbf4 100644
+--- a/apps/api/src/money/categories/categories.service.spec.ts
++++ b/apps/api/src/money/categories/categories.service.spec.ts
+@@ -30,6 +30,7 @@ function setup() {
+       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+       deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+     },
++    transaction: { count: vi.fn().mockResolvedValue(0) },
+   };
+   return { prisma, service: new CategoriesService(prisma as never) };
+ }
+@@ -177,6 +178,20 @@ describe('CategoriesService', () => {
+     });
+   });
+ 
++  it('refuses to delete a category that has transactions', async () => {
++    const { prisma, service } = setup();
++    prisma.category.findFirst.mockResolvedValue(row());
++    prisma.transaction.count.mockResolvedValueOnce(2);
++    await expect(service.remove('u1', 'c1')).rejects.toBeInstanceOf(
++      ConflictException,
++    );
++    expect(prisma.transaction.count.mock.calls[0][0].where).toEqual({
++      userId: 'u1',
++      categoryId: 'c1',
++    });
++    expect(prisma.category.deleteMany).not.toHaveBeenCalled();
++  });
 +
-+import { EmojiPicker as Picker } from "frimousse";
-+import { useLocale, useTranslations } from "next-intl";
+   it('erases all of a user’s categories for the data-deletion job', async () => {
+     const { prisma, service } = setup();
+     await service.removeAllForUser('u1');
+diff --git a/apps/api/src/money/categories/categories.service.ts b/apps/api/src/money/categories/categories.service.ts
+index 9b30166..42b4c16 100644
+--- a/apps/api/src/money/categories/categories.service.ts
++++ b/apps/api/src/money/categories/categories.service.ts
+@@ -77,11 +77,18 @@ export class CategoriesService {
+         "Default categories can't be deleted. Archive it instead.",
+       );
+     }
+-    // P2-03: also refuse (409) when transactions use this category.
++    const used = await this.prisma.transaction.count({
++      where: { userId, categoryId: id },
++    });
++    if (used > 0) {
++      throw new ConflictException(
++        'This category has transactions. Archive it instead.',
++      );
++    }
+     await this.prisma.category.deleteMany({ where: { id, userId } });
+   }
+ 
+-  /** Used by the data-deletion job. P2-03: delete the user's transactions first. */
++  /** Used by the data-deletion job, after the user's transactions are erased. */
+   async removeAllForUser(userId: string): Promise<void> {
+     await this.prisma.category.deleteMany({ where: { userId } });
+   }
+diff --git a/apps/api/src/money/money-data-purger.spec.ts b/apps/api/src/money/money-data-purger.spec.ts
+new file mode 100644
+index 0000000..fd4e6db
+--- /dev/null
++++ b/apps/api/src/money/money-data-purger.spec.ts
+@@ -0,0 +1,26 @@
++import { MoneyDataPurger } from './money-data-purger';
++
++describe('MoneyDataPurger', () => {
++  it('erases transactions before the accounts and categories they reference', async () => {
++    const order: string[] = [];
++    const step = (name: string) => ({
++      removeAllForUser: vi.fn().mockImplementation(() => {
++        order.push(name);
++        return Promise.resolve();
++      }),
++    });
++    const registry = { register: vi.fn() };
++    const purger = new MoneyDataPurger(
++      registry as never,
++      step('accounts') as never,
++      step('categories') as never,
++      step('transactions') as never,
++    );
++    purger.onModuleInit();
++    expect(registry.register).toHaveBeenCalledWith(purger);
++
++    await purger.purge('u1');
++    expect(order[0]).toBe('transactions');
++    expect(order).toHaveLength(3);
++  });
++});
+diff --git a/apps/api/src/money/money-data-purger.ts b/apps/api/src/money/money-data-purger.ts
+index cf51f9c..c65bd22 100644
+--- a/apps/api/src/money/money-data-purger.ts
++++ b/apps/api/src/money/money-data-purger.ts
+@@ -1,7 +1,11 @@
+ import { Injectable, OnModuleInit } from '@nestjs/common';
+-import { ToolDataRegistry, type ToolDataPurger } from '../users/tools/tool-data';
++import {
++  ToolDataRegistry,
++  type ToolDataPurger,
++} from '../users/tools/tool-data';
+ import { AccountsService } from './accounts/accounts.service';
+ import { CategoriesService } from './categories/categories.service';
++import { TransactionsService } from './transactions/transactions.service';
+ 
+ @Injectable()
+ export class MoneyDataPurger implements ToolDataPurger, OnModuleInit {
+@@ -11,6 +15,7 @@ export class MoneyDataPurger implements ToolDataPurger, OnModuleInit {
+     private readonly registry: ToolDataRegistry,
+     private readonly accounts: AccountsService,
+     private readonly categories: CategoriesService,
++    private readonly transactions: TransactionsService,
+   ) {}
+ 
+   onModuleInit() {
+@@ -19,7 +24,8 @@ export class MoneyDataPurger implements ToolDataPurger, OnModuleInit {
+ 
+   /** Erases everything the user stored in Money. New Money tables go here (children first). */
+   async purge(userId: string) {
+-    // Children first. P2-03 adds transactions before these two.
++    // Children first: transactions reference both accounts and categories.
++    await this.transactions.removeAllForUser(userId);
+     await this.categories.removeAllForUser(userId);
+     await this.accounts.removeAllForUser(userId);
+   }
+diff --git a/apps/api/src/money/money.module.ts b/apps/api/src/money/money.module.ts
+index 6f9ddf8..86daa81 100644
+--- a/apps/api/src/money/money.module.ts
++++ b/apps/api/src/money/money.module.ts
+@@ -5,10 +5,21 @@ import { AccountsService } from './accounts/accounts.service';
+ import { MoneyDataPurger } from './money-data-purger';
+ import { CategoriesController } from './categories/categories.controller';
+ import { CategoriesService } from './categories/categories.service';
++import { TransactionsController } from './transactions/transactions.controller';
++import { TransactionsService } from './transactions/transactions.service';
+ 
+ @Module({
+   imports: [UsersModule],
+-  controllers: [AccountsController, CategoriesController],
+-  providers: [AccountsService, MoneyDataPurger, CategoriesService],
++  controllers: [
++    AccountsController,
++    CategoriesController,
++    TransactionsController,
++  ],
++  providers: [
++    AccountsService,
++    MoneyDataPurger,
++    CategoriesService,
++    TransactionsService,
++  ],
+ })
+ export class MoneyModule {}
+diff --git a/apps/api/src/money/transactions/balance.spec.ts b/apps/api/src/money/transactions/balance.spec.ts
+new file mode 100644
+index 0000000..88d1ffc
+--- /dev/null
++++ b/apps/api/src/money/transactions/balance.spec.ts
+@@ -0,0 +1,41 @@
++import { computeDeltas } from './balance';
++
++describe('computeDeltas', () => {
++  it('adds income and subtracts expenses', () => {
++    const d = computeDeltas(
++      [
++        { accountId: 'a', type: 'income', sum: 10_000n },
++        { accountId: 'a', type: 'expense', sum: 2_500n },
++      ],
++      [],
++    );
++    expect(d.get('a')).toBe(7_500n);
++  });
++
++  it('moves a transfer out of the source and into the destination', () => {
++    const d = computeDeltas(
++      [{ accountId: 'a', type: 'transfer', sum: 4_000n }],
++      [{ accountId: 'b', sum: 4_000n }],
++    );
++    expect(d.get('a')).toBe(-4_000n);
++    expect(d.get('b')).toBe(4_000n);
++  });
++
++  it('combines everything that touches one account and leaves others out', () => {
++    const d = computeDeltas(
++      [
++        { accountId: 'a', type: 'income', sum: 1_000n },
++        { accountId: 'a', type: 'transfer', sum: 300n },
++      ],
++      [{ accountId: 'a', sum: 50n }],
++    );
++    expect(d.get('a')).toBe(750n);
++    expect(d.has('z')).toBe(false);
++  });
++
++  it('is exact above 2^53', () => {
++    const big = 9_007_199_254_740_993n;
++    const d = computeDeltas([{ accountId: 'a', type: 'income', sum: big }], []);
++    expect(d.get('a')).toBe(big);
++  });
++});
+diff --git a/apps/api/src/money/transactions/balance.ts b/apps/api/src/money/transactions/balance.ts
+new file mode 100644
+index 0000000..80b0b21
+--- /dev/null
++++ b/apps/api/src/money/transactions/balance.ts
+@@ -0,0 +1,24 @@
++export type OutgoingSum = {
++  accountId: string;
++  type: 'income' | 'expense' | 'transfer';
++  sum: bigint;
++};
++export type IncomingSum = { accountId: string; sum: bigint };
 +
 +/**
-+ * Searchable emoji picker (frimousse, unstyled), styled with our tokens.
-+ * Emoji data comes from the Emojibase CDN and has English and French names;
-+ * Arabic users get the English search names.
++ * What the transactions add to or take from each account's opening balance.
++ * Income adds. Expense and the source side of a transfer subtract. The destination of a
++ * transfer adds. Balances are always computed from this, never stored.
 + */
-+export function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
-+  const t = useTranslations("Money.categories");
-+  const locale = useLocale();
-+
-+  return (
-+    <Picker.Root
-+      locale={locale === "fr" ? "fr" : "en"}
-+      columns={8}
-+      onEmojiSelect={({ emoji }) => onSelect(emoji)}
-+      // Enter in the search box must not submit the surrounding form.
-+      onKeyDownCapture={(e) => e.key === "Enter" && e.preventDefault()}
-+      className="flex h-72 w-full flex-col rounded-2xl border-2 border-border bg-card"
-+    >
-+      <Picker.Search
-+        autoFocus
-+        aria-label={t("emojiSearch")}
-+        placeholder={t("emojiSearch")}
-+        className="m-2 h-10 rounded-xl border-2 border-input bg-muted px-3 text-sm outline-none focus-visible:border-ring focus-visible:bg-background"
-+      />
-+      <Picker.Viewport className="min-h-0 flex-1 outline-none">
-+        <Picker.Loading className="grid h-full place-items-center text-sm text-muted-foreground">
-+          {t("emojiLoading")}
-+        </Picker.Loading>
-+        <Picker.Empty className="grid h-full place-items-center text-sm text-muted-foreground">
-+          {t("emojiEmpty")}
-+        </Picker.Empty>
-+        <Picker.List
-+          components={{
-+            CategoryHeader: ({ category, ...props }) => (
-+              <div
-+                {...props}
-+                className="bg-card px-3 pt-3 pb-1.5 text-xs font-bold text-muted-foreground"
-+              >
-+                {category.label}
-+              </div>
-+            ),
-+            Row: ({ children, ...props }) => (
-+              <div {...props} className="scroll-my-1.5 px-1.5">
-+                {children}
-+              </div>
-+            ),
-+            Emoji: ({ emoji, ...props }) => (
-+              <button
-+                {...props}
-+                type="button"
-+                className="flex size-9 items-center justify-center rounded-lg text-xl data-[active]:bg-accent"
-+              >
-+                {emoji.emoji}
-+              </button>
-+            ),
-+          }}
-+        />
-+      </Picker.Viewport>
-+    </Picker.Root>
-+  );
++export function computeDeltas(
++  outgoing: OutgoingSum[],
++  incoming: IncomingSum[],
++): Map<string, bigint> {
++  const deltas = new Map<string, bigint>();
++  const add = (id: string, amount: bigint) =>
++    deltas.set(id, (deltas.get(id) ?? 0n) + amount);
++  for (const r of outgoing)
++    add(r.accountId, r.type === 'income' ? r.sum : -r.sum);
++  for (const r of incoming) add(r.accountId, r.sum);
++  return deltas;
 +}
-diff --git a/apps/web/src/features/money/categories/emoji-presets.ts b/apps/web/src/features/money/categories/emoji-presets.ts
-deleted file mode 100644
-index 29cd3b0..0000000
---- a/apps/web/src/features/money/categories/emoji-presets.ts
-+++ /dev/null
-@@ -1,35 +0,0 @@
--/** Quick picks for the category dialog. Any other emoji can be typed or pasted. */
--export const EMOJI_PRESETS = [
--  "🛒",
--  "🍔",
--  "☕",
--  "🍕",
--  "🚗",
--  "⛽",
--  "🏠",
--  "💡",
--  "📱",
--  "👕",
--  "🎮",
--  "🎬",
--  "✈️",
--  "🏖️",
--  "💊",
--  "🏋️",
--  "📚",
--  "🎓",
--  "👶",
--  "🐶",
--  "🎁",
--  "💼",
--  "💻",
--  "📈",
--  "💰",
--  "🏦",
--  "🧾",
--  "🔧",
--  "💇",
--  "🎵",
--  "🕌",
--  "🤲",
--] as const;
+diff --git a/apps/api/src/money/transactions/transactions.controller.ts b/apps/api/src/money/transactions/transactions.controller.ts
+new file mode 100644
+index 0000000..680a86a
+--- /dev/null
++++ b/apps/api/src/money/transactions/transactions.controller.ts
+@@ -0,0 +1,116 @@
++import {
++  Body,
++  Controller,
++  Delete,
++  Get,
++  HttpCode,
++  Param,
++  Patch,
++  Post,
++  Query,
++} from '@nestjs/common';
++import {
++  ApiBearerAuth,
++  ApiCookieAuth,
++  ApiQuery,
++  ApiTags,
++} from '@nestjs/swagger';
++import {
++  createTransactionSchema,
++  listTransactionsQuerySchema,
++  transactionIdSchema,
++  transactionSchema,
++  transactionsResponseSchema,
++  updateTransactionSchema,
++  type CreateTransactionInput,
++  type ListTransactionsQuery,
++  type UpdateTransactionInput,
++} from '@lifeos/shared';
++import { CurrentUser } from '../../auth/current-user.decorator';
++import { ApiErrors, ZodBody, ZodResponse } from '../../common/openapi';
++import { ZodValidationPipe } from '../../common/zod-validation.pipe';
++import { RequireTool } from '../../users/tools/tool-access';
++import { TransactionsService } from './transactions.service';
++
++const idPipe = new ZodValidationPipe(transactionIdSchema);
++
++@ApiTags('money')
++@ApiBearerAuth()
++@ApiCookieAuth('access_token')
++@RequireTool('money')
++@Controller('money/transactions')
++export class TransactionsController {
++  constructor(private readonly transactions: TransactionsService) {}
++
++  @Get()
++  @ApiQuery({ name: 'accountId', required: false })
++  @ApiQuery({ name: 'categoryId', required: false })
++  @ApiQuery({
++    name: 'type',
++    required: false,
++    enum: ['income', 'expense', 'transfer'],
++  })
++  @ApiQuery({ name: 'from', required: false, description: 'YYYY-MM-DD' })
++  @ApiQuery({ name: 'to', required: false, description: 'YYYY-MM-DD' })
++  @ApiQuery({
++    name: 'limit',
++    required: false,
++    description: '1 to 100, default 50',
++  })
++  @ApiQuery({
++    name: 'cursor',
++    required: false,
++    description: 'nextCursor of the previous page',
++  })
++  @ZodResponse(200, transactionsResponseSchema)
++  @ApiErrors(400, 401, 403)
++  list(
++    @CurrentUser() user: { id: string },
++    @Query(new ZodValidationPipe(listTransactionsQuerySchema))
++    query: ListTransactionsQuery,
++  ) {
++    return this.transactions.list(user.id, query);
++  }
++
++  @Post()
++  @ZodBody(createTransactionSchema)
++  @ZodResponse(201, transactionSchema)
++  @ApiErrors(400, 401, 403, 404, 409)
++  create(
++    @CurrentUser() user: { id: string },
++    @Body(new ZodValidationPipe(createTransactionSchema))
++    body: CreateTransactionInput,
++  ) {
++    return this.transactions.create(user.id, body);
++  }
++
++  @Get(':id')
++  @ZodResponse(200, transactionSchema)
++  @ApiErrors(400, 401, 403, 404)
++  get(@CurrentUser() user: { id: string }, @Param('id', idPipe) id: string) {
++    return this.transactions.get(user.id, id);
++  }
++
++  @Patch(':id')
++  @ZodBody(updateTransactionSchema)
++  @ZodResponse(200, transactionSchema)
++  @ApiErrors(400, 401, 403, 404, 409)
++  update(
++    @CurrentUser() user: { id: string },
++    @Param('id', idPipe) id: string,
++    @Body(new ZodValidationPipe(updateTransactionSchema))
++    body: UpdateTransactionInput,
++  ) {
++    return this.transactions.update(user.id, id, body);
++  }
++
++  @Delete(':id')
++  @HttpCode(204)
++  @ApiErrors(400, 401, 403, 404)
++  async remove(
++    @CurrentUser() user: { id: string },
++    @Param('id', idPipe) id: string,
++  ) {
++    await this.transactions.remove(user.id, id);
++  }
++}
+diff --git a/apps/api/src/money/transactions/transactions.mapper.ts b/apps/api/src/money/transactions/transactions.mapper.ts
+new file mode 100644
+index 0000000..06d858b
+--- /dev/null
++++ b/apps/api/src/money/transactions/transactions.mapper.ts
+@@ -0,0 +1,32 @@
++import type { Transaction, TransactionType } from '@lifeos/shared';
++
++type TransactionRow = {
++  id: string;
++  type: TransactionType;
++  amount: bigint;
++  currency: string;
++  accountId: string;
++  toAccountId: string | null;
++  categoryId: string | null;
++  date: Date;
++  note: string | null;
++  createdAt: Date;
++};
++
++/** The `date` column is a calendar day stored at UTC midnight. BigInt in, strings out. */
++export function toTransactionDto(row: TransactionRow): Transaction {
++  return {
++    id: row.id,
++    type: row.type,
++    amount: row.amount.toString(),
++    currency: row.currency,
++    accountId: row.accountId,
++    toAccountId: row.toAccountId,
++    categoryId: row.categoryId,
++    date: row.date.toISOString().slice(0, 10),
++    note: row.note,
++    createdAt: row.createdAt.toISOString(),
++  };
++}
++
++export const toDbDate = (day: string) => new Date(`${day}T00:00:00.000Z`);
+diff --git a/apps/api/src/money/transactions/transactions.schema.spec.ts b/apps/api/src/money/transactions/transactions.schema.spec.ts
+new file mode 100644
+index 0000000..35cceae
+--- /dev/null
++++ b/apps/api/src/money/transactions/transactions.schema.spec.ts
+@@ -0,0 +1,98 @@
++import {
++  createTransactionSchema,
++  listTransactionsQuerySchema,
++  updateTransactionSchema,
++} from '@lifeos/shared';
++
++const id = (n: number) => `c${String(n).padStart(24, 'x')}`; // 25-char cuid-like
++const [a, b, c] = [id(1), id(2), id(3)];
++
++const expense = {
++  type: 'expense',
++  amount: '12050',
++  accountId: a,
++  categoryId: c,
++  date: '2026-11-27',
++} as const;
++
++describe('transaction schemas', () => {
++  it('accepts an expense, an income and a transfer', () => {
++    expect(createTransactionSchema.safeParse(expense).success).toBe(true);
++    expect(
++      createTransactionSchema.safeParse({ ...expense, type: 'income' }).success,
++    ).toBe(true);
++    expect(
++      createTransactionSchema.safeParse({
++        type: 'transfer',
++        amount: '500',
++        accountId: a,
++        toAccountId: b,
++        date: '2026-11-27',
++      }).success,
++    ).toBe(true);
++  });
++
++  it('rejects zero, negative and non-integer amounts', () => {
++    for (const amount of ['0', '-100', '12.5', 'abc', '']) {
++      expect(
++        createTransactionSchema.safeParse({ ...expense, amount }).success,
++      ).toBe(false);
++    }
++  });
++
++  it('rejects bad dates and over-long notes', () => {
++    for (const date of ['2026-13-01', '27/11/2026', '2026-11-27T10:00:00Z']) {
++      expect(
++        createTransactionSchema.safeParse({ ...expense, date }).success,
++      ).toBe(false);
++    }
++    expect(
++      createTransactionSchema.safeParse({ ...expense, note: 'x'.repeat(201) })
++        .success,
++    ).toBe(false);
++  });
++
++  it('needs a category for income and expense, and forbids one on a transfer', () => {
++    const { categoryId: _c, ...noCategory } = expense;
++    expect(createTransactionSchema.safeParse(noCategory).success).toBe(false);
++    expect(
++      createTransactionSchema.safeParse({
++        type: 'transfer',
++        amount: '500',
++        accountId: a,
++        toAccountId: b,
++        categoryId: c,
++        date: '2026-11-27',
++      }).success,
++    ).toBe(false);
++  });
++
++  it('rejects a transfer to the same account', () => {
++    expect(
++      createTransactionSchema.safeParse({
++        type: 'transfer',
++        amount: '500',
++        accountId: a,
++        toAccountId: a,
++        date: '2026-11-27',
++      }).success,
++    ).toBe(false);
++  });
++
++  it('does not let an update change the type', () => {
++    expect(updateTransactionSchema.safeParse({ type: 'income' }).success).toBe(
++      false,
++    );
++    expect(updateTransactionSchema.safeParse({ note: null }).success).toBe(
++      true,
++    );
++  });
++
++  it('applies list defaults and caps the page size', () => {
++    expect(listTransactionsQuerySchema.parse({}).limit).toBe(50);
++    expect(listTransactionsQuerySchema.parse({ limit: '20' }).limit).toBe(20);
++    expect(
++      listTransactionsQuerySchema.safeParse({ limit: '101' }).success,
++    ).toBe(false);
++  });
++});
+diff --git a/apps/api/src/money/transactions/transactions.service.spec.ts b/apps/api/src/money/transactions/transactions.service.spec.ts
+new file mode 100644
+index 0000000..27ef88a
+--- /dev/null
++++ b/apps/api/src/money/transactions/transactions.service.spec.ts
+@@ -0,0 +1,309 @@
++import {
++  BadRequestException,
++  ConflictException,
++  NotFoundException,
++} from '@nestjs/common';
++import { TransactionsService } from './transactions.service';
++
++const account = (over = {}) => ({
++  id: 'a1',
++  userId: 'u1',
++  currency: 'MAD',
++  archivedAt: null as Date | null,
++  ...over,
++});
++const category = (over = {}) => ({
++  id: 'k1',
++  userId: 'u1',
++  kind: 'expense' as const,
++  archivedAt: null as Date | null,
++  ...over,
++});
++const row = (over = {}) => ({
++  id: 't1',
++  userId: 'u1',
++  type: 'expense' as const,
++  amount: 12_050n,
++  currency: 'MAD',
++  accountId: 'a1',
++  toAccountId: null as string | null,
++  categoryId: 'k1' as string | null,
++  date: new Date('2026-11-27T00:00:00.000Z'),
++  note: null as string | null,
++  createdAt: new Date('2026-11-27T10:00:00.000Z'),
++  ...over,
++});
++
++function setup() {
++  const prisma = {
++    transaction: {
++      findMany: vi.fn().mockResolvedValue([]),
++      findFirst: vi.fn(),
++      create: vi.fn().mockImplementation(({ data }) => row(data)),
++      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
++      deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
++    },
++    account: { findFirst: vi.fn().mockResolvedValue(account()) },
++    category: { findFirst: vi.fn().mockResolvedValue(category()) },
++  };
++  return { prisma, service: new TransactionsService(prisma as never) };
++}
++
++const expense = {
++  type: 'expense' as const,
++  amount: '12050',
++  accountId: 'a1',
++  categoryId: 'k1',
++  date: '2026-11-27',
++};
++const transfer = {
++  type: 'transfer' as const,
++  amount: '5000',
++  accountId: 'a1',
++  toAccountId: 'a2',
++  date: '2026-11-27',
++};
++
++describe('TransactionsService', () => {
++  describe('list', () => {
++    it('is scoped to the user and sorted newest first', async () => {
++      const { prisma, service } = setup();
++      await service.list('u1', { limit: 50 });
++      const call = prisma.transaction.findMany.mock.calls[0][0];
++      expect(call.where).toEqual({ userId: 'u1' });
++      expect(call.orderBy[0]).toEqual({ date: 'desc' });
++      expect(call.take).toBe(51);
++    });
++
++    it('matches an account as source or transfer destination, within a date range', async () => {
++      const { prisma, service } = setup();
++      await service.list('u1', {
++        limit: 50,
++        accountId: 'a1',
++        from: '2026-11-01',
++        to: '2026-11-30',
++      });
++      const where = prisma.transaction.findMany.mock.calls[0][0].where;
++      expect(where.userId).toBe('u1');
++      expect(where.OR).toEqual([{ accountId: 'a1' }, { toAccountId: 'a1' }]);
++      expect(where.date.gte).toEqual(new Date('2026-11-01T00:00:00.000Z'));
++      expect(where.date.lte).toEqual(new Date('2026-11-30T00:00:00.000Z'));
++    });
++
++    it('returns a cursor only when there is another page', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findMany.mockResolvedValueOnce([
++        row({ id: 't1' }),
++        row({ id: 't2' }),
++        row({ id: 't3' }),
++      ]);
++      const page = await service.list('u1', { limit: 2 });
++      expect(page.transactions.map((t) => t.id)).toEqual(['t1', 't2']);
++      expect(page.nextCursor).toBe('t2');
++
++      prisma.transaction.findMany.mockResolvedValueOnce([row({ id: 't9' })]);
++      expect((await service.list('u1', { limit: 2 })).nextCursor).toBeNull();
++    });
++
++    it('continues after the cursor', async () => {
++      const { prisma, service } = setup();
++      await service.list('u1', { limit: 10, cursor: 't2' });
++      const call = prisma.transaction.findMany.mock.calls[0][0];
++      expect(call.cursor).toEqual({ id: 't2' });
++      expect(call.skip).toBe(1);
++    });
++  });
++
++  describe('create', () => {
++    it('stores the amount as BigInt, the account currency and the day', async () => {
++      const { prisma, service } = setup();
++      prisma.account.findFirst.mockResolvedValue(account({ currency: 'EUR' }));
++      const dto = await service.create('u1', { ...expense, note: '  Milk ' });
++      const data = prisma.transaction.create.mock.calls[0][0].data;
++      expect(data).toMatchObject({
++        userId: 'u1',
++        type: 'expense',
++        amount: 12_050n,
++        currency: 'EUR',
++        toAccountId: null,
++        note: 'Milk',
++      });
++      expect(dto.amount).toBe('12050');
++      expect(dto.date).toBe('2026-11-27');
++    });
++
++    it('looks up the account and category only among the user’s own', async () => {
++      const { prisma, service } = setup();
++      await service.create('u1', expense);
++      expect(prisma.account.findFirst.mock.calls[0][0].where).toEqual({
++        id: 'a1',
++        userId: 'u1',
++      });
++      expect(prisma.category.findFirst.mock.calls[0][0].where).toEqual({
++        id: 'k1',
++        userId: 'u1',
++      });
++    });
++
++    it('404s on someone else’s or a missing account or category', async () => {
++      const { prisma, service } = setup();
++      prisma.account.findFirst.mockResolvedValueOnce(null);
++      await expect(service.create('u1', expense)).rejects.toBeInstanceOf(
++        NotFoundException,
++      );
++      prisma.category.findFirst.mockResolvedValueOnce(null);
++      await expect(service.create('u1', expense)).rejects.toBeInstanceOf(
++        NotFoundException,
++      );
++      expect(prisma.transaction.create).not.toHaveBeenCalled();
++    });
++
++    it('rejects a category of the other kind', async () => {
++      const { prisma, service } = setup();
++      prisma.category.findFirst.mockResolvedValue(category({ kind: 'income' }));
++      await expect(service.create('u1', expense)).rejects.toBeInstanceOf(
++        BadRequestException,
++      );
++    });
++
++    it('rejects an archived account or category', async () => {
++      const { prisma, service } = setup();
++      prisma.account.findFirst.mockResolvedValueOnce(
++        account({ archivedAt: new Date() }),
++      );
++      await expect(service.create('u1', expense)).rejects.toBeInstanceOf(
++        ConflictException,
++      );
++      prisma.category.findFirst.mockResolvedValueOnce(
++        category({ archivedAt: new Date() }),
++      );
++      await expect(service.create('u1', expense)).rejects.toBeInstanceOf(
++        ConflictException,
++      );
++    });
++
++    it('creates a transfer between two accounts of the same currency, with no category', async () => {
++      const { prisma, service } = setup();
++      prisma.account.findFirst
++        .mockResolvedValueOnce(account({ id: 'a1' }))
++        .mockResolvedValueOnce(account({ id: 'a2' }));
++      await service.create('u1', transfer);
++      const data = prisma.transaction.create.mock.calls[0][0].data;
++      expect(data).toMatchObject({
++        type: 'transfer',
++        accountId: 'a1',
++        toAccountId: 'a2',
++        categoryId: null,
++      });
++      expect(prisma.category.findFirst).not.toHaveBeenCalled();
++    });
++
++    it('rejects a transfer between different currencies', async () => {
++      const { prisma, service } = setup();
++      prisma.account.findFirst
++        .mockResolvedValueOnce(account({ id: 'a1', currency: 'MAD' }))
++        .mockResolvedValueOnce(account({ id: 'a2', currency: 'EUR' }));
++      await expect(service.create('u1', transfer)).rejects.toBeInstanceOf(
++        BadRequestException,
++      );
++      expect(prisma.transaction.create).not.toHaveBeenCalled();
++    });
++  });
++
++  describe('update', () => {
++    it('404s when the transaction is not the user’s', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(null);
++      await expect(
++        service.update('u1', 'x', { amount: '100' }),
++      ).rejects.toBeInstanceOf(NotFoundException);
++      expect(prisma.transaction.findFirst.mock.calls[0][0].where).toEqual({
++        id: 'x',
++        userId: 'u1',
++      });
++    });
++
++    it('changes only what was sent and writes scoped to the user', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(row());
++      await service.update('u1', 't1', { amount: '999', note: null });
++      const call = prisma.transaction.updateMany.mock.calls[0][0];
++      expect(call.where).toEqual({ id: 't1', userId: 'u1' });
++      expect(call.data).toMatchObject({ amount: 999n, note: null });
++      expect(call.data).not.toHaveProperty('date');
++    });
++
++    it('lets a transaction keep an account that was archived since', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(row());
++      prisma.account.findFirst.mockResolvedValue(
++        account({ archivedAt: new Date() }),
++      );
++      await expect(
++        service.update('u1', 't1', { amount: '10' }),
++      ).resolves.toBeDefined();
++    });
++
++    it('rejects moving it to an archived account', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(row());
++      prisma.account.findFirst.mockResolvedValue(
++        account({ id: 'a9', archivedAt: new Date() }),
++      );
++      await expect(
++        service.update('u1', 't1', { accountId: 'a9' }),
++      ).rejects.toBeInstanceOf(ConflictException);
++    });
++
++    it('refuses a category on a transfer and a destination on an expense', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(
++        row({ type: 'transfer', categoryId: null, toAccountId: 'a2' }),
++      );
++      await expect(
++        service.update('u1', 't1', { categoryId: 'k1' }),
++      ).rejects.toBeInstanceOf(BadRequestException);
++
++      prisma.transaction.findFirst.mockResolvedValue(row());
++      await expect(
++        service.update('u1', 't1', { toAccountId: 'a2' }),
++      ).rejects.toBeInstanceOf(BadRequestException);
++    });
++
++    it('takes the currency from the new account', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.findFirst.mockResolvedValue(row());
++      prisma.account.findFirst.mockResolvedValue(
++        account({ id: 'a2', currency: 'EUR' }),
++      );
++      await service.update('u1', 't1', { accountId: 'a2' });
++      expect(prisma.transaction.updateMany.mock.calls[0][0].data).toMatchObject(
++        {
++          accountId: 'a2',
++          currency: 'EUR',
++        },
++      );
++    });
++  });
++
++  it('deletes only the user’s own transaction and 404s otherwise', async () => {
++    const { prisma, service } = setup();
++    await expect(service.remove('u1', 't1')).resolves.toBeUndefined();
++    expect(prisma.transaction.deleteMany.mock.calls[0][0].where).toEqual({
++      id: 't1',
++      userId: 'u1',
++    });
++    prisma.transaction.deleteMany.mockResolvedValueOnce({ count: 0 });
++    await expect(service.remove('u1', 'x')).rejects.toBeInstanceOf(
++      NotFoundException,
++    );
++  });
++
++  it('erases only the given user’s transactions for the data-deletion job', async () => {
++    const { prisma, service } = setup();
++    await service.removeAllForUser('u1');
++    expect(prisma.transaction.deleteMany.mock.calls[0][0].where).toEqual({
++      userId: 'u1',
++    });
++  });
++});
+diff --git a/apps/api/src/money/transactions/transactions.service.ts b/apps/api/src/money/transactions/transactions.service.ts
+new file mode 100644
+index 0000000..18d9b48
+--- /dev/null
++++ b/apps/api/src/money/transactions/transactions.service.ts
+@@ -0,0 +1,207 @@
++import {
++  BadRequestException,
++  ConflictException,
++  Injectable,
++  NotFoundException,
++} from '@nestjs/common';
++import type {
++  CreateTransactionInput,
++  ListTransactionsQuery,
++  Transaction,
++  TransactionsResponse,
++  TransactionType,
++  UpdateTransactionInput,
++} from '@lifeos/shared';
++import { PrismaService } from '../../prisma/prisma.service';
++import { toDbDate, toTransactionDto } from './transactions.mapper';
++
++type Refs = {
++  type: TransactionType;
++  accountId: string;
++  toAccountId: string | null;
++  categoryId: string | null;
++};
++
++@Injectable()
++export class TransactionsService {
++  constructor(private readonly prisma: PrismaService) {}
++
++  async list(
++    userId: string,
++    q: ListTransactionsQuery,
++  ): Promise<TransactionsResponse> {
++    const rows = await this.prisma.transaction.findMany({
++      where: {
++        userId,
++        ...(q.type && { type: q.type }),
++        ...(q.categoryId && { categoryId: q.categoryId }),
++        ...(q.accountId && {
++          OR: [{ accountId: q.accountId }, { toAccountId: q.accountId }],
++        }),
++        ...((q.from || q.to) && {
++          date: {
++            ...(q.from && { gte: toDbDate(q.from) }),
++            ...(q.to && { lte: toDbDate(q.to) }),
++          },
++        }),
++      },
++      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
++      take: q.limit + 1,
++      ...(q.cursor && { cursor: { id: q.cursor }, skip: 1 }),
++    });
++    const page = rows.slice(0, q.limit);
++    return {
++      transactions: page.map(toTransactionDto),
++      nextCursor: rows.length > q.limit ? page[page.length - 1].id : null,
++    };
++  }
++
++  async get(userId: string, id: string): Promise<Transaction> {
++    return toTransactionDto(await this.getOwned(userId, id));
++  }
++
++  async create(
++    userId: string,
++    input: CreateTransactionInput,
++  ): Promise<Transaction> {
++    const refs: Refs = {
++      type: input.type,
++      accountId: input.accountId,
++      toAccountId: input.type === 'transfer' ? input.toAccountId : null,
++      categoryId: input.type === 'transfer' ? null : input.categoryId,
++    };
++    const currency = await this.checkRefs(userId, refs);
++    const row = await this.prisma.transaction.create({
++      data: {
++        userId,
++        ...refs,
++        currency,
++        amount: BigInt(input.amount),
++        date: toDbDate(input.date),
++        note: input.note?.trim() || null,
++      },
++    });
++    return toTransactionDto(row);
++  }
++
++  async update(
++    userId: string,
++    id: string,
++    input: UpdateTransactionInput,
++  ): Promise<Transaction> {
++    const existing = await this.getOwned(userId, id);
++    const refs: Refs = {
++      type: existing.type,
++      accountId: input.accountId ?? existing.accountId,
++      toAccountId: input.toAccountId ?? existing.toAccountId,
++      categoryId: input.categoryId ?? existing.categoryId,
++    };
++    const currency = await this.checkRefs(userId, refs, existing);
++    await this.prisma.transaction.updateMany({
++      where: { id, userId },
++      data: {
++        accountId: refs.accountId,
++        toAccountId: refs.toAccountId,
++        categoryId: refs.categoryId,
++        currency,
++        ...(input.amount !== undefined && { amount: BigInt(input.amount) }),
++        ...(input.date !== undefined && { date: toDbDate(input.date) }),
++        ...(input.note !== undefined && { note: input.note?.trim() || null }),
++      },
++    });
++    return this.get(userId, id);
++  }
++
++  async remove(userId: string, id: string): Promise<void> {
++    const { count } = await this.prisma.transaction.deleteMany({
++      where: { id, userId },
++    });
++    if (count === 0) throw new NotFoundException('Transaction not found');
++  }
++
++  /** Used by the data-deletion job. Runs before accounts and categories are erased. */
++  async removeAllForUser(userId: string): Promise<void> {
++    await this.prisma.transaction.deleteMany({ where: { userId } });
++  }
++
++  /**
++   * Every rule that ties a transaction to its accounts and category, for create and update.
++   * Returns the currency to store. `previous` lets an existing transaction keep an account
++   * or category that was archived since, but a newly chosen one can't be archived.
++   */
++  private async checkRefs(
++    userId: string,
++    refs: Refs,
++    previous?: Omit<Refs, 'type'>,
++  ): Promise<string> {
++    const account = await this.ownedAccount(
++      userId,
++      refs.accountId,
++      previous?.accountId,
++    );
++
++    if (refs.type === 'transfer') {
++      if (refs.categoryId) {
++        throw new BadRequestException('A transfer has no category');
++      }
++      if (!refs.toAccountId || refs.toAccountId === refs.accountId) {
++        throw new BadRequestException('Choose two different accounts');
++      }
++      const to = await this.ownedAccount(
++        userId,
++        refs.toAccountId,
++        previous?.toAccountId,
++      );
++      if (to.currency !== account.currency) {
++        throw new BadRequestException(
++          'A transfer needs two accounts in the same currency',
++        );
++      }
++      return account.currency;
++    }
++
++    if (refs.toAccountId) {
++      throw new BadRequestException(
++        'Only a transfer has a destination account',
++      );
++    }
++    const category = refs.categoryId
++      ? await this.prisma.category.findFirst({
++          where: { id: refs.categoryId, userId },
++        })
++      : null;
++    if (!category) throw new NotFoundException('Category not found');
++    if (category.kind !== refs.type) {
++      throw new BadRequestException(
++        `An ${refs.type} transaction needs an ${refs.type} category`,
++      );
++    }
++    if (category.archivedAt && category.id !== previous?.categoryId) {
++      throw new ConflictException('This category is archived');
++    }
++    return account.currency;
++  }
++
++  private async ownedAccount(
++    userId: string,
++    id: string,
++    previousId?: string | null,
++  ) {
++    const account = await this.prisma.account.findFirst({
++      where: { id, userId },
++    });
++    if (!account) throw new NotFoundException('Account not found');
++    if (account.archivedAt && id !== previousId) {
++      throw new ConflictException('This account is archived');
++    }
++    return account;
++  }
++
++  private async getOwned(userId: string, id: string) {
++    const row = await this.prisma.transaction.findFirst({
++      where: { id, userId },
++    });
++    if (!row) throw new NotFoundException('Transaction not found');
++    return row;
++  }
++}
+diff --git a/packages/shared/src/index.ts b/packages/shared/src/index.ts
+index 17e2ae5..a4ff8c1 100644
+--- a/packages/shared/src/index.ts
++++ b/packages/shared/src/index.ts
+@@ -7,3 +7,4 @@ export * from "./tools";
+ export * from "./money";
+ export * from "./money-units";
+ export * from "./categories";
++export * from "./transactions";
+diff --git a/packages/shared/src/transactions.ts b/packages/shared/src/transactions.ts
+new file mode 100644
+index 0000000..0583829
+--- /dev/null
++++ b/packages/shared/src/transactions.ts
+@@ -0,0 +1,107 @@
++import { z } from "zod";
++import { currencySchema } from "./common";
++import { minorUnitsSchema } from "./money";
++
++export const TRANSACTION_TYPES = ["income", "expense", "transfer"] as const;
++export const transactionTypeSchema = z.enum(TRANSACTION_TYPES);
++export type TransactionType = z.infer<typeof transactionTypeSchema>;
++
++/** A transaction amount: whole minor units, greater than zero. The type gives the direction. */
++export const positiveMinorUnitsSchema = minorUnitsSchema.refine(
++  (v) => v !== "0" && !v.startsWith("-"),
++  "Amount must be greater than zero",
++);
++
++/** A calendar day, "YYYY-MM-DD". Transactions have no time of day. */
++export const transactionDateSchema = z.iso.date();
++
++const noteSchema = z.string().trim().max(200);
++const idSchema = z.cuid();
++
++export const transactionSchema = z.object({
++  id: z.string(),
++  type: transactionTypeSchema,
++  amount: minorUnitsSchema,
++  /** The account's currency. A transfer's two accounts always share it. */
++  currency: currencySchema,
++  accountId: z.string(),
++  /** Destination of a transfer, otherwise null. */
++  toAccountId: z.string().nullable(),
++  /** Income and expense only. */
++  categoryId: z.string().nullable(),
++  date: transactionDateSchema,
++  note: z.string().nullable(),
++  createdAt: z.iso.datetime(),
++});
++export type Transaction = z.infer<typeof transactionSchema>;
++
++export const transactionsResponseSchema = z.object({
++  transactions: z.array(transactionSchema),
++  /** Pass as `cursor` to get the next page. Null on the last page. */
++  nextCursor: z.string().nullable(),
++});
++export type TransactionsResponse = z.infer<typeof transactionsResponseSchema>;
++
++const createCashFlowSchema = z.strictObject({
++  type: z.enum(["income", "expense"]),
++  amount: positiveMinorUnitsSchema,
++  accountId: idSchema,
++  categoryId: idSchema,
++  date: transactionDateSchema,
++  note: noteSchema.optional(),
++});
++
++const createTransferSchema = z
++  .strictObject({
++    type: z.literal("transfer"),
++    amount: positiveMinorUnitsSchema,
++    accountId: idSchema.describe("Source account"),
++    toAccountId: idSchema.describe("Destination account, in the same currency"),
++    date: transactionDateSchema,
++    note: noteSchema.optional(),
++  })
++  .refine((v) => v.accountId !== v.toAccountId, {
++    message: "Choose two different accounts",
++    path: ["toAccountId"],
++  });
++
++export const createTransactionSchema = z.discriminatedUnion("type", [
++  createCashFlowSchema,
++  createTransferSchema,
++]);
++export type CreateTransactionInput = z.input<typeof createTransactionSchema>;
++
++// type is not editable: delete the transaction and create a new one instead.
++export const updateTransactionSchema = z.strictObject({
++  amount: positiveMinorUnitsSchema.optional(),
++  accountId: idSchema.optional(),
++  toAccountId: idSchema.optional(),
++  categoryId: idSchema.optional(),
++  date: transactionDateSchema.optional(),
++  /** null clears the note. */
++  note: noteSchema.nullable().optional(),
++});
++export type UpdateTransactionInput = z.input<typeof updateTransactionSchema>;
++
++export const transactionIdSchema = idSchema;
++
++export const TRANSACTIONS_PAGE_SIZE = 50;
++export const MAX_TRANSACTIONS_PAGE_SIZE = 100;
++
++export const listTransactionsQuerySchema = z.object({
++  /** Matches transactions where this account is the source or the transfer destination. */
++  accountId: idSchema.optional(),
++  categoryId: idSchema.optional(),
++  type: transactionTypeSchema.optional(),
++  /** Inclusive. */
++  from: transactionDateSchema.optional(),
++  to: transactionDateSchema.optional(),
++  limit: z.coerce
++    .number()
++    .int()
++    .min(1)
++    .max(MAX_TRANSACTIONS_PAGE_SIZE)
++    .default(TRANSACTIONS_PAGE_SIZE),
++  cursor: idSchema.optional(),
++});
++export type ListTransactionsQuery = z.output<typeof listTransactionsQuerySchema>;

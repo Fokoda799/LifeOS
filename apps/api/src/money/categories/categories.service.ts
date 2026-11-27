@@ -77,11 +77,18 @@ export class CategoriesService {
         "Default categories can't be deleted. Archive it instead.",
       );
     }
-    // P2-03: also refuse (409) when transactions use this category.
+    const used = await this.prisma.transaction.count({
+      where: { userId, categoryId: id },
+    });
+    if (used > 0) {
+      throw new ConflictException(
+        'This category has transactions. Archive it instead.',
+      );
+    }
     await this.prisma.category.deleteMany({ where: { id, userId } });
   }
 
-  /** Used by the data-deletion job. P2-03: delete the user's transactions first. */
+  /** Used by the data-deletion job, after the user's transactions are erased. */
   async removeAllForUser(userId: string): Promise<void> {
     await this.prisma.category.deleteMany({ where: { userId } });
   }

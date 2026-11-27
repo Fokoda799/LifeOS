@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 
 const row = (over = {}) => ({
@@ -21,6 +21,10 @@ function setup() {
       create: vi.fn(),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       deleteMany: vi.fn(),
+    },
+    transaction: {
+      count: vi.fn().mockResolvedValue(0),
+      groupBy: vi.fn().mockResolvedValue([]),
     },
   };
   const users = { findById: vi.fn().mockResolvedValue({ currency: 'EUR' }) };
@@ -120,6 +124,37 @@ describe('AccountsService', () => {
     await expect(service.remove('u1', 'x')).rejects.toBeInstanceOf(
       NotFoundException,
     );
+  });
+
+  it('refuses to delete an account that has transactions', async () => {
+    const { prisma, service } = setup();
+    prisma.transaction.count.mockResolvedValueOnce(3);
+    await expect(service.remove('u1', 'c1')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(prisma.transaction.count.mock.calls[0][0].where).toEqual({
+      userId: 'u1',
+      OR: [{ accountId: 'c1' }, { toAccountId: 'c1' }],
+    });
+    expect(prisma.account.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('computes the balance from the opening balance and the transactions', async () => {
+    const { prisma, service } = setup();
+    prisma.account.findMany.mockResolvedValue([
+      row({ openingBalance: 10_000n }),
+    ]);
+    prisma.transaction.groupBy
+      .mockResolvedValueOnce([
+        { accountId: 'c1', type: 'income', _sum: { amount: 5_000n } },
+        { accountId: 'c1', type: 'expense', _sum: { amount: 1_200n } },
+        { accountId: 'c1', type: 'transfer', _sum: { amount: 800n } },
+      ])
+      .mockResolvedValueOnce([{ toAccountId: 'c1', _sum: { amount: 300n } }]);
+    const [account] = await service.list('u1', false);
+    expect(account.openingBalance).toBe('10000');
+    expect(account.balance).toBe('13300'); // 10000 + 5000 - 1200 - 800 + 300
+    expect(prisma.transaction.groupBy.mock.calls[0][0].where.userId).toBe('u1');
   });
 
   it('erases only the given user’s accounts for the data-deletion job', async () => {
