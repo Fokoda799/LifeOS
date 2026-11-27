@@ -57,6 +57,18 @@
   --chart-4: #c2410c;
   --chart-5: #db2777;
 
+  /* Category colors (Money). Keys match CATEGORY_COLORS in @lifeos/shared. */
+  --cat-teal: #0f766e;
+  --cat-blue: #1d4ed8;
+  --cat-indigo: #4338ca;
+  --cat-purple: #7e22ce;
+  --cat-pink: #be185d;
+  --cat-red: #b91c1c;
+  --cat-orange: #c2410c;
+  --cat-amber: #b45309;
+  --cat-green: #15803d;
+  --cat-slate: #475569;
+
   --radius: 0.875rem;
 }
 
@@ -104,6 +116,18 @@
   --chart-3: #60a5fa;
   --chart-4: #fb923c;
   --chart-5: #f472b6;
+
+  /* Category colors (Money). Keys match CATEGORY_COLORS in @lifeos/shared. */
+  --cat-teal: #2dd4bf;
+  --cat-blue: #60a5fa;
+  --cat-indigo: #818cf8;
+  --cat-purple: #c084fc;
+  --cat-pink: #f472b6;
+  --cat-red: #f87171;
+  --cat-orange: #fb923c;
+  --cat-amber: #fbbf24;
+  --cat-green: #4ade80;
+  --cat-slate: #94a3b8;
 }
 
 /* Put data-tool on a wrapper (not <html>). It must stay after :root and .dark. */
@@ -166,6 +190,17 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  --color-cat-teal: var(--cat-teal);
+  --color-cat-blue: var(--cat-blue);
+  --color-cat-indigo: var(--cat-indigo);
+  --color-cat-purple: var(--cat-purple);
+  --color-cat-pink: var(--cat-pink);
+  --color-cat-red: var(--cat-red);
+  --color-cat-orange: var(--cat-orange);
+  --color-cat-amber: var(--cat-amber);
+  --color-cat-green: var(--cat-green);
+  --color-cat-slate: var(--cat-slate);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
