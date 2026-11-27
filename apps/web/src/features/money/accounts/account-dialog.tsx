@@ -9,8 +9,8 @@ import {
   parseAmount,
   type Account,
 } from "@lifeos/shared";
-import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
+import { useLocale, useTranslations } from "next-intl";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { OptionSelect } from "@/components/ui/select";
 import { validationKey } from "@/features/auth/errors";
 import { FormField } from "@/features/auth/form-field";
 import { useMe } from "@/features/auth/use-auth";
@@ -69,6 +70,7 @@ export function AccountDialog({
 function AccountForm({ account, onDone }: { account?: Account; onDone: () => void }) {
   const t = useTranslations("Money.accounts");
   const tv = useTranslations("Validation");
+  const locale = useLocale();
   const { data: me } = useMe();
   const create = useCreateAccount();
   const update = useUpdateAccount();
@@ -81,6 +83,8 @@ function AccountForm({ account, onDone }: { account?: Account; onDone: () => voi
 
   const {
     register,
+    control,
+    setValue,
     handleSubmit,
     setError,
     formState: { errors },
@@ -95,6 +99,8 @@ function AccountForm({ account, onDone }: { account?: Account; onDone: () => voi
   });
 
   const nameKey = validationKey(errors.name);
+  const currency = useWatch({ control, name: "currency" });
+  const currencyNames = new Intl.DisplayNames(locale, { type: "currency" });
 
   const onSubmit = handleSubmit((values) => {
     const raw = values.openingBalance.trim();
@@ -156,18 +162,17 @@ function AccountForm({ account, onDone }: { account?: Account; onDone: () => voi
 
       <div className="grid gap-2">
         <Label htmlFor="currency">{t("currency")}</Label>
-        <select
+        <OptionSelect
           id="currency"
           disabled={!!account}
-          className="h-11 w-full rounded-xl border-2 border-input bg-muted px-4 text-base font-bold outline-none focus-visible:border-ring focus-visible:bg-background disabled:opacity-60"
-          {...register("currency")}
-        >
-          {currencies.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          value={currency}
+          onValueChange={(c) => setValue("currency", c)}
+          options={currencies.map((c) => ({
+            value: c,
+            label: c,
+            description: currencyNames.of(c),
+          }))}
+        />
         {account && <p className="text-sm text-muted-foreground">{t("currencyLocked")}</p>}
       </div>
 

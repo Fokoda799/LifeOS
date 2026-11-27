@@ -42,9 +42,7 @@ export function AccountCard({
           <Icon aria-hidden className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <h3 dir="auto" className="truncate text-lg font-extrabold">
-            {account.name}
-          </h3>
+          <h3 className="truncate text-lg font-extrabold">{account.name}</h3>
           <p className="text-sm text-muted-foreground">
             {t(`types.${account.type}`)} · <bdi dir="ltr">{account.currency}</bdi>
           </p>

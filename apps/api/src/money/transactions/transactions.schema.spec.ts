@@ -1,6 +1,7 @@
 import {
   createTransactionSchema,
   listTransactionsQuerySchema,
+  transactionFiltersSchema,
   updateTransactionSchema,
 } from '@lifeos/shared';
 
@@ -93,6 +94,25 @@ describe('transaction schemas', () => {
     expect(listTransactionsQuerySchema.parse({ limit: '20' }).limit).toBe(20);
     expect(
       listTransactionsQuerySchema.safeParse({ limit: '101' }).success,
+    ).toBe(false);
+  });
+
+  it('validates the search text and the date range', () => {
+    expect(listTransactionsQuerySchema.parse({ q: '  milk ' }).q).toBe('milk');
+    expect(listTransactionsQuerySchema.safeParse({ q: '   ' }).success).toBe(
+      false,
+    );
+    expect(
+      transactionFiltersSchema.safeParse({
+        from: '2026-11-01',
+        to: '2026-11-30',
+      }).success,
+    ).toBe(true);
+    expect(
+      transactionFiltersSchema.safeParse({
+        from: '2026-12-01',
+        to: '2026-11-30',
+      }).success,
     ).toBe(false);
   });
 });

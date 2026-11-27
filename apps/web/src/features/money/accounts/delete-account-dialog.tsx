@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ApiRequestError } from "@/lib/api";
 import { useDeleteAccount } from "./use-accounts";
 
 export function DeleteAccountDialog({
@@ -47,7 +48,12 @@ export function DeleteAccountDialog({
                     toast.success(t("toastDeleted", { name: account.name }));
                     onOpenChange(false);
                   },
-                  onError: () => toast.error(t("errorSave")),
+                  onError: (error) =>
+                    toast.error(
+                      error instanceof ApiRequestError && error.status === 409
+                        ? t("errorHasTransactions")
+                        : t("errorSave"),
+                    ),
                 })
               }
             >

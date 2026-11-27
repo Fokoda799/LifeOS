@@ -88,7 +88,7 @@ export const transactionIdSchema = idSchema;
 export const TRANSACTIONS_PAGE_SIZE = 50;
 export const MAX_TRANSACTIONS_PAGE_SIZE = 100;
 
-export const listTransactionsQuerySchema = z.object({
+const filterFields = {
   /** Matches transactions where this account is the source or the transfer destination. */
   accountId: idSchema.optional(),
   categoryId: idSchema.optional(),
@@ -96,12 +96,41 @@ export const listTransactionsQuerySchema = z.object({
   /** Inclusive. */
   from: transactionDateSchema.optional(),
   to: transactionDateSchema.optional(),
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_TRANSACTIONS_PAGE_SIZE)
-    .default(TRANSACTIONS_PAGE_SIZE),
-  cursor: idSchema.optional(),
-});
+  /** Searches the note, ignoring case. */
+  q: z.string().trim().min(1).max(100).optional(),
+};
+
+const validRange = (v: { from?: string; to?: string }) => !v.from || !v.to || v.from <= v.to;
+const rangeError = { message: "`from` must not be after `to`", path: ["to"] };
+
+/** The filters a list and its summary share. */
+export const transactionFiltersSchema = z.object(filterFields).refine(validRange, rangeError);
+export type TransactionFilters = z.output<typeof transactionFiltersSchema>;
+
+export const listTransactionsQuerySchema = z
+  .object({
+    ...filterFields,
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_TRANSACTIONS_PAGE_SIZE)
+      .default(TRANSACTIONS_PAGE_SIZE),
+    cursor: idSchema.optional(),
+  })
+  .refine(validRange, rangeError);
 export type ListTransactionsQuery = z.output<typeof listTransactionsQuerySchema>;
+
+export const transactionsSummarySchema = z.object({
+  /** One entry per currency that has income or expenses. Transfers are not counted. */
+  totals: z.array(
+    z.object({
+      currency: currencySchema,
+      income: minorUnitsSchema,
+      expense: minorUnitsSchema,
+      /** income minus expense. May be negative. */
+      net: minorUnitsSchema,
+    }),
+  ),
+});
+export type TransactionsSummary = z.infer<typeof transactionsSummarySchema>;
