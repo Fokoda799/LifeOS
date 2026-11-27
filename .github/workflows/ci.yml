@@ -40,6 +40,12 @@ jobs:
       # Order matters: api and web import the built shared package and the generated Prisma client.
       - run: pnpm --filter @lifeos/shared build
       - run: pnpm --filter api db:generate
+      - name: Normalize Prisma client output path
+        run: |
+          if [ -d apps/api/prisma/src/generated/prisma ] && [ ! -e apps/api/src/generated/prisma ]; then
+            mkdir -p apps/api/src/generated
+            mv apps/api/prisma/src/generated/prisma apps/api/src/generated/prisma
+          fi
 
       - run: pnpm typecheck
       - run: pnpm lint
