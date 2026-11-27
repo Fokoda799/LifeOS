@@ -1,278 +1,947 @@
-diff --git a/apps/web/messages/ar.json b/apps/web/messages/ar.json
-index 69637f6..cec548b 100644
---- a/apps/web/messages/ar.json
-+++ b/apps/web/messages/ar.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "لا يمكن تغيير النوع بعد إنشاء الفئة.",
-       "icon": "الأيقونة",
-       "emojiTitle": "أو اختر رمزاً تعبيرياً",
--      "emojiInput": "اكتب رمزاً تعبيرياً أو الصقه",
--      "emojiHint": "استخدم لوحة الرموز التعبيرية في لوحة المفاتيح أو الصق رمزاً.",
-+      "emojiChoose": "اختر رمزاً تعبيرياً",
-+      "emojiChange": "تغيير الرمز التعبيري",
-+      "emojiSearch": "ابحث عن رمز تعبيري…",
-+      "emojiLoading": "جارٍ تحميل الرموز التعبيرية…",
-+      "emojiEmpty": "لم يُعثر على رمز تعبيري.",
-       "color": "اللون",
-       "save": "حفظ",
-       "saving": "جارٍ الحفظ…",
-diff --git a/apps/web/messages/en.json b/apps/web/messages/en.json
-index 79a27d2..ff1f0d6 100644
---- a/apps/web/messages/en.json
-+++ b/apps/web/messages/en.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "The type can't be changed after the category is created.",
-       "icon": "Icon",
-       "emojiTitle": "Or pick an emoji",
--      "emojiInput": "Type or paste an emoji",
--      "emojiHint": "Use your keyboard's emoji picker, or paste one.",
-+      "emojiChoose": "Choose an emoji",
-+      "emojiChange": "Change emoji",
-+      "emojiSearch": "Search emoji…",
-+      "emojiLoading": "Loading emoji…",
-+      "emojiEmpty": "No emoji found.",
-       "color": "Color",
-       "save": "Save",
-       "saving": "Saving…",
-diff --git a/apps/web/messages/fr.json b/apps/web/messages/fr.json
-index ea97e7e..9cadd47 100644
---- a/apps/web/messages/fr.json
-+++ b/apps/web/messages/fr.json
-@@ -276,8 +276,11 @@
-       "typeLocked": "Le type ne peut plus être modifié une fois la catégorie créée.",
-       "icon": "Icône",
-       "emojiTitle": "Ou choisissez un emoji",
--      "emojiInput": "Saisissez ou collez un emoji",
--      "emojiHint": "Utilisez le sélecteur d'emojis de votre clavier ou collez-en un.",
-+      "emojiChoose": "Choisir un emoji",
-+      "emojiChange": "Changer d'emoji",
-+      "emojiSearch": "Rechercher un emoji…",
-+      "emojiLoading": "Chargement des emojis…",
-+      "emojiEmpty": "Aucun emoji trouvé.",
-       "color": "Couleur",
-       "save": "Enregistrer",
-       "saving": "Enregistrement…",
-diff --git a/apps/web/src/features/money/categories/category-dialog.tsx b/apps/web/src/features/money/categories/category-dialog.tsx
-index d2c68f4..3a7f15c 100644
---- a/apps/web/src/features/money/categories/category-dialog.tsx
-+++ b/apps/web/src/features/money/categories/category-dialog.tsx
-@@ -7,11 +7,11 @@ import {
-   MAX_CATEGORIES_PER_USER,
-   categoryColorSchema,
-   categoryIconSchema,
--  emojiSchema,
-   categoryKindSchema,
-   type Category,
-   type CategoryKind,
- } from "@lifeos/shared";
-+import { Smile } from "lucide-react";
- import { useTranslations } from "next-intl";
- import { useForm, useWatch } from "react-hook-form";
- import { useState } from "react";
-@@ -26,13 +26,11 @@ import {
-   DialogHeader,
-   DialogTitle,
- } from "@/components/ui/dialog";
--import { Input } from "@/components/ui/input";
--import { Label } from "@/components/ui/label";
- import { validationKey } from "@/features/auth/errors";
- import { FormField } from "@/features/auth/form-field";
- import { ApiRequestError } from "@/lib/api";
- import { categoryColorClasses, categoryIcons, isIconKey } from "./category-style";
--import { EMOJI_PRESETS } from "./emoji-presets";
-+import { EmojiPicker } from "./emoji-picker";
- import { useCategoryName, useCreateCategory, useUpdateCategory } from "./use-categories";
- 
- const schema = z.object({
-@@ -116,18 +114,10 @@ function CategoryForm({
- 
-   const nameKey = validationKey(errors.name);
-   const icon = useWatch({ control, name: "icon" });
--  const [emojiText, setEmojiText] = useState(isIconKey(icon) ? "" : icon);
-+  const [pickerOpen, setPickerOpen] = useState(false);
- 
-   function pickIcon(value: string) {
-     setValue("icon", value, { shouldDirty: true });
--    setEmojiText(isIconKey(value) ? "" : value);
--  }
--
--  // Keep only the last emoji typed or pasted; ignore anything that isn't one.
--  function onEmojiInput(text: string) {
--    const last = [...new Intl.Segmenter().segment(text)].pop()?.segment ?? "";
--    if (emojiSchema.safeParse(last).success) pickIcon(last);
--    else if (text === "") setEmojiText("");
+diff --git a/apps/api/src/money/transactions/summary.spec.ts b/apps/api/src/money/transactions/summary.spec.ts
+new file mode 100644
+index 0000000..713df04
+--- /dev/null
++++ b/apps/api/src/money/transactions/summary.spec.ts
+@@ -0,0 +1,30 @@
++import { summarize } from './summary';
++
++describe('summarize', () => {
++  it('totals income, expense and net per currency, sorted by currency', () => {
++    expect(
++      summarize([
++        { currency: 'MAD', type: 'income', sum: 500_000n },
++        { currency: 'MAD', type: 'expense', sum: 120_050n },
++        { currency: 'EUR', type: 'expense', sum: 2_000n },
++      ]),
++    ).toEqual([
++      { currency: 'EUR', income: '0', expense: '2000', net: '-2000' },
++      { currency: 'MAD', income: '500000', expense: '120050', net: '379950' },
++    ]);
++  });
++
++  it('ignores transfers and returns nothing when there is nothing to total', () => {
++    expect(summarize([{ currency: 'MAD', type: 'transfer', sum: 9n }])).toEqual(
++      [],
++    );
++    expect(summarize([])).toEqual([]);
++  });
++
++  it('stays exact above 2^53', () => {
++    const big = 9_007_199_254_740_993n;
++    expect(
++      summarize([{ currency: 'MAD', type: 'income', sum: big }])[0].income,
++    ).toBe('9007199254740993');
++  });
++});
+diff --git a/apps/api/src/money/transactions/summary.ts b/apps/api/src/money/transactions/summary.ts
+new file mode 100644
+index 0000000..13cf085
+--- /dev/null
++++ b/apps/api/src/money/transactions/summary.ts
+@@ -0,0 +1,26 @@
++import type { TransactionsSummary } from '@lifeos/shared';
++
++export type SumRow = {
++  currency: string;
++  type: 'income' | 'expense' | 'transfer';
++  sum: bigint;
++};
++
++/** Income, expense and net per currency. Transfers move money, they don't earn or spend it. */
++export function summarize(rows: SumRow[]): TransactionsSummary['totals'] {
++  const byCurrency = new Map<string, { income: bigint; expense: bigint }>();
++  for (const r of rows) {
++    if (r.type === 'transfer') continue;
++    const t = byCurrency.get(r.currency) ?? { income: 0n, expense: 0n };
++    t[r.type] += r.sum;
++    byCurrency.set(r.currency, t);
++  }
++  return [...byCurrency.entries()]
++    .sort(([a], [b]) => a.localeCompare(b))
++    .map(([currency, t]) => ({
++      currency,
++      income: t.income.toString(),
++      expense: t.expense.toString(),
++      net: (t.income - t.expense).toString(),
++    }));
++}
+diff --git a/apps/api/src/money/transactions/transactions.controller.ts b/apps/api/src/money/transactions/transactions.controller.ts
+index 680a86a..78313f1 100644
+--- a/apps/api/src/money/transactions/transactions.controller.ts
++++ b/apps/api/src/money/transactions/transactions.controller.ts
+@@ -18,6 +18,9 @@ import {
+ import {
+   createTransactionSchema,
+   listTransactionsQuerySchema,
++  transactionFiltersSchema,
++  transactionsSummarySchema,
++  type TransactionFilters,
+   transactionIdSchema,
+   transactionSchema,
+   transactionsResponseSchema,
+@@ -72,6 +75,27 @@ export class TransactionsController {
+     return this.transactions.list(user.id, query);
    }
  
-   const onSubmit = handleSubmit((values) => {
-@@ -220,35 +210,30 @@ function CategoryForm({
-         </div>
++  @Get('summary')
++  @ApiQuery({ name: 'accountId', required: false })
++  @ApiQuery({ name: 'categoryId', required: false })
++  @ApiQuery({
++    name: 'type',
++    required: false,
++    enum: ['income', 'expense', 'transfer'],
++  })
++  @ApiQuery({ name: 'from', required: false, description: 'YYYY-MM-DD' })
++  @ApiQuery({ name: 'to', required: false, description: 'YYYY-MM-DD' })
++  @ApiQuery({ name: 'q', required: false, description: 'Search the note' })
++  @ZodResponse(200, transactionsSummarySchema)
++  @ApiErrors(400, 401, 403)
++  summary(
++    @CurrentUser() user: { id: string },
++    @Query(new ZodValidationPipe(transactionFiltersSchema))
++    query: TransactionFilters,
++  ) {
++    return this.transactions.summary(user.id, query);
++  }
++
+   @Post()
+   @ZodBody(createTransactionSchema)
+   @ZodResponse(201, transactionSchema)
+diff --git a/apps/api/src/money/transactions/transactions.schema.spec.ts b/apps/api/src/money/transactions/transactions.schema.spec.ts
+index 35cceae..4da408c 100644
+--- a/apps/api/src/money/transactions/transactions.schema.spec.ts
++++ b/apps/api/src/money/transactions/transactions.schema.spec.ts
+@@ -1,6 +1,7 @@
+ import {
+   createTransactionSchema,
+   listTransactionsQuerySchema,
++  transactionFiltersSchema,
+   updateTransactionSchema,
+ } from '@lifeos/shared';
  
-         <p className="text-sm font-bold text-muted-foreground">{t("emojiTitle")}</p>
--        <div className="grid grid-cols-8 gap-2">
--          {EMOJI_PRESETS.map((value) => (
--            <button
--              key={value}
--              type="button"
--              aria-pressed={icon === value}
--              onClick={() => pickIcon(value)}
--              className={`${choice} aspect-square text-xl leading-none ${icon === value ? selected : ""}`}
--            >
--              {value}
--            </button>
--          ))}
--        </div>
--        <div className="grid gap-2">
--          <Label htmlFor="emoji">{t("emojiInput")}</Label>
--          <Input
--            id="emoji"
--            dir="ltr"
--            autoComplete="off"
--            value={emojiText}
--            placeholder="🙂"
--            aria-describedby="emoji-hint"
--            onChange={(e) => onEmojiInput(e.target.value)}
--            className="w-24 text-center text-xl"
-+        <Button
-+          type="button"
-+          variant="outline"
-+          aria-expanded={pickerOpen}
-+          onClick={() => setPickerOpen((open) => !open)}
-+          className="justify-start"
-+        >
-+          {isIconKey(icon) ? (
-+            <Smile aria-hidden />
-+          ) : (
-+            <span aria-hidden className="text-xl leading-none">
-+              {icon}
-+            </span>
-+          )}
-+          {isIconKey(icon) ? t("emojiChoose") : t("emojiChange")}
-+        </Button>
-+        {pickerOpen && (
-+          <EmojiPicker
-+            onSelect={(emoji) => {
-+              pickIcon(emoji);
-+              setPickerOpen(false);
-+            }}
-           />
--          <p id="emoji-hint" className="text-sm text-muted-foreground">
--            {t("emojiHint")}
--          </p>
--        </div>
-+        )}
-       </fieldset>
+@@ -95,4 +96,23 @@ describe('transaction schemas', () => {
+       listTransactionsQuerySchema.safeParse({ limit: '101' }).success,
+     ).toBe(false);
+   });
++
++  it('validates the search text and the date range', () => {
++    expect(listTransactionsQuerySchema.parse({ q: '  milk ' }).q).toBe('milk');
++    expect(listTransactionsQuerySchema.safeParse({ q: '   ' }).success).toBe(
++      false,
++    );
++    expect(
++      transactionFiltersSchema.safeParse({
++        from: '2026-11-01',
++        to: '2026-11-30',
++      }).success,
++    ).toBe(true);
++    expect(
++      transactionFiltersSchema.safeParse({
++        from: '2026-12-01',
++        to: '2026-11-30',
++      }).success,
++    ).toBe(false);
++  });
+ });
+diff --git a/apps/api/src/money/transactions/transactions.service.spec.ts b/apps/api/src/money/transactions/transactions.service.spec.ts
+index 27ef88a..15d4186 100644
+--- a/apps/api/src/money/transactions/transactions.service.spec.ts
++++ b/apps/api/src/money/transactions/transactions.service.spec.ts
+@@ -38,6 +38,7 @@ function setup() {
+   const prisma = {
+     transaction: {
+       findMany: vi.fn().mockResolvedValue([]),
++      groupBy: vi.fn().mockResolvedValue([]),
+       findFirst: vi.fn(),
+       create: vi.fn().mockImplementation(({ data }) => row(data)),
+       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+@@ -114,6 +115,36 @@ describe('TransactionsService', () => {
+     });
+   });
  
-       <fieldset className="grid gap-2">
-diff --git a/apps/web/src/features/money/categories/emoji-picker.tsx b/apps/web/src/features/money/categories/emoji-picker.tsx
++  describe('search and summary', () => {
++    it('searches the note without case, still scoped to the user', async () => {
++      const { prisma, service } = setup();
++      await service.list('u1', { limit: 50, q: 'milk' });
++      expect(prisma.transaction.findMany.mock.calls[0][0].where).toEqual({
++        userId: 'u1',
++        note: { contains: 'milk', mode: 'insensitive' },
++      });
++    });
++
++    it('sums income and expense with the list’s filters, never across users', async () => {
++      const { prisma, service } = setup();
++      prisma.transaction.groupBy.mockResolvedValue([
++        { currency: 'MAD', type: 'income', _sum: { amount: 10_000n } },
++        { currency: 'MAD', type: 'expense', _sum: { amount: 2_500n } },
++      ]);
++      const result = await service.summary('u1', {
++        categoryId: 'k1',
++        from: '2026-11-01',
++        to: '2026-11-30',
++      });
++      expect(result.totals).toEqual([
++        { currency: 'MAD', income: '10000', expense: '2500', net: '7500' },
++      ]);
++      const where = prisma.transaction.groupBy.mock.calls[0][0].where;
++      expect(where.AND[0]).toMatchObject({ userId: 'u1', categoryId: 'k1' });
++      expect(where.AND[1]).toEqual({ type: { in: ['income', 'expense'] } });
++    });
++  });
++
+   describe('create', () => {
+     it('stores the amount as BigInt, the account currency and the day', async () => {
+       const { prisma, service } = setup();
+diff --git a/apps/api/src/money/transactions/transactions.service.ts b/apps/api/src/money/transactions/transactions.service.ts
+index 18d9b48..fbab99b 100644
+--- a/apps/api/src/money/transactions/transactions.service.ts
++++ b/apps/api/src/money/transactions/transactions.service.ts
+@@ -7,12 +7,15 @@ import {
+ import type {
+   CreateTransactionInput,
+   ListTransactionsQuery,
++  TransactionFilters,
++  TransactionsSummary,
+   Transaction,
+   TransactionsResponse,
+   TransactionType,
+   UpdateTransactionInput,
+ } from '@lifeos/shared';
+ import { PrismaService } from '../../prisma/prisma.service';
++import { summarize } from './summary';
+ import { toDbDate, toTransactionDto } from './transactions.mapper';
+ 
+ type Refs = {
+@@ -31,20 +34,7 @@ export class TransactionsService {
+     q: ListTransactionsQuery,
+   ): Promise<TransactionsResponse> {
+     const rows = await this.prisma.transaction.findMany({
+-      where: {
+-        userId,
+-        ...(q.type && { type: q.type }),
+-        ...(q.categoryId && { categoryId: q.categoryId }),
+-        ...(q.accountId && {
+-          OR: [{ accountId: q.accountId }, { toAccountId: q.accountId }],
+-        }),
+-        ...((q.from || q.to) && {
+-          date: {
+-            ...(q.from && { gte: toDbDate(q.from) }),
+-            ...(q.to && { lte: toDbDate(q.to) }),
+-          },
+-        }),
+-      },
++      where: this.where(userId, q),
+       orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
+       take: q.limit + 1,
+       ...(q.cursor && { cursor: { id: q.cursor }, skip: 1 }),
+@@ -56,6 +46,38 @@ export class TransactionsService {
+     };
+   }
+ 
++  /** Income, expense and net for the same filters as the list (transfers excluded). */
++  async summary(
++    userId: string,
++    filters: TransactionFilters,
++  ): Promise<TransactionsSummary> {
++    const rows = await this.prisma.transaction.groupBy({
++      by: ['currency', 'type'],
++      where: {
++        AND: [
++          this.where(userId, filters),
++          { type: { in: ['income', 'expense'] } },
++        ],
++      },
++      _sum: { amount: true },
++    });
++    return {
++      totals: summarize(
++        rows.map(
++          (r: {
++            currency: string;
++            type: 'income' | 'expense' | 'transfer';
++            _sum: { amount: bigint | null };
++          }) => ({
++            currency: r.currency,
++            type: r.type,
++            sum: r._sum.amount ?? 0n,
++          }),
++        ),
++      ),
++    };
++  }
++
+   async get(userId: string, id: string): Promise<Transaction> {
+     return toTransactionDto(await this.getOwned(userId, id));
+   }
+@@ -119,6 +141,25 @@ export class TransactionsService {
+     if (count === 0) throw new NotFoundException('Transaction not found');
+   }
+ 
++  /** The user's own transactions, narrowed by the optional filters. */
++  private where(userId: string, f: TransactionFilters) {
++    return {
++      userId,
++      ...(f.type && { type: f.type }),
++      ...(f.categoryId && { categoryId: f.categoryId }),
++      ...(f.accountId && {
++        OR: [{ accountId: f.accountId }, { toAccountId: f.accountId }],
++      }),
++      ...((f.from || f.to) && {
++        date: {
++          ...(f.from && { gte: toDbDate(f.from) }),
++          ...(f.to && { lte: toDbDate(f.to) }),
++        },
++      }),
++      ...(f.q && { note: { contains: f.q, mode: 'insensitive' as const } }),
++    };
++  }
++
+   /** Used by the data-deletion job. Runs before accounts and categories are erased. */
+   async removeAllForUser(userId: string): Promise<void> {
+     await this.prisma.transaction.deleteMany({ where: { userId } });
+diff --git a/apps/web/messages/ar.json b/apps/web/messages/ar.json
+index 89cd32a..07830aa 100644
+--- a/apps/web/messages/ar.json
++++ b/apps/web/messages/ar.json
+@@ -417,7 +417,22 @@
+       "errorLoad": "تعذّر تحميل معاملاتك.",
+       "errorDelete": "تعذّر حذف المعاملة. حاول مرة أخرى.",
+       "deleteTitle": "حذف هذه المعاملة؟",
+-      "deleteDescription": "ستُزال من سجلّك ومن رصيد الحساب. لا يمكن التراجع عن هذا."
++      "deleteDescription": "ستُزال من سجلّك ومن رصيد الحساب. لا يمكن التراجع عن هذا.",
++      "searchLabel": "البحث في المعاملات",
++      "searchPlaceholder": "ابحث في الملاحظات",
++      "categoryFilter": "الفئة",
++      "allCategories": "كل الفئات",
++      "clearFilters": "مسح المرشحات",
++      "periodPrevious": "الشهر السابق",
++      "periodNext": "الشهر التالي",
++      "allTime": "كل الوقت",
++      "thisMonth": "هذا الشهر",
++      "summaryLabel": "الملخص",
++      "summaryIncome": "الدخل",
++      "summaryExpense": "المصروف",
++      "summaryNet": "الصافي",
++      "emptyPeriodTitle": "لا شيء مسجّل في هذه الفترة",
++      "emptyPeriodDescription": "أضف معاملة أو انتقل إلى شهر آخر أو إلى كل الوقت."
+     }
+   }
+ }
+diff --git a/apps/web/messages/en.json b/apps/web/messages/en.json
+index 1a9971b..5f108b0 100644
+--- a/apps/web/messages/en.json
++++ b/apps/web/messages/en.json
+@@ -417,7 +417,22 @@
+       "errorLoad": "Couldn't load your transactions.",
+       "errorDelete": "Couldn't delete the transaction. Try again.",
+       "deleteTitle": "Delete this transaction?",
+-      "deleteDescription": "This removes it from your history and your account balance. This can't be undone."
++      "deleteDescription": "This removes it from your history and your account balance. This can't be undone.",
++      "searchLabel": "Search transactions",
++      "searchPlaceholder": "Search notes",
++      "categoryFilter": "Category",
++      "allCategories": "All categories",
++      "clearFilters": "Clear filters",
++      "periodPrevious": "Previous month",
++      "periodNext": "Next month",
++      "allTime": "All time",
++      "thisMonth": "This month",
++      "summaryLabel": "Summary",
++      "summaryIncome": "Income",
++      "summaryExpense": "Spent",
++      "summaryNet": "Net",
++      "emptyPeriodTitle": "Nothing recorded this period",
++      "emptyPeriodDescription": "Add a transaction, or switch to another month or all time."
+     }
+   }
+ }
+diff --git a/apps/web/messages/fr.json b/apps/web/messages/fr.json
+index 45358d5..a8bb0b1 100644
+--- a/apps/web/messages/fr.json
++++ b/apps/web/messages/fr.json
+@@ -417,7 +417,22 @@
+       "errorLoad": "Impossible de charger vos transactions.",
+       "errorDelete": "Impossible de supprimer la transaction. Réessayez.",
+       "deleteTitle": "Supprimer cette transaction ?",
+-      "deleteDescription": "Elle sera retirée de votre historique et du solde du compte. Cette action est irréversible."
++      "deleteDescription": "Elle sera retirée de votre historique et du solde du compte. Cette action est irréversible.",
++      "searchLabel": "Rechercher des transactions",
++      "searchPlaceholder": "Rechercher dans les notes",
++      "categoryFilter": "Catégorie",
++      "allCategories": "Toutes les catégories",
++      "clearFilters": "Effacer les filtres",
++      "periodPrevious": "Mois précédent",
++      "periodNext": "Mois suivant",
++      "allTime": "Tout l'historique",
++      "thisMonth": "Ce mois-ci",
++      "summaryLabel": "Résumé",
++      "summaryIncome": "Revenus",
++      "summaryExpense": "Dépensé",
++      "summaryNet": "Net",
++      "emptyPeriodTitle": "Rien d'enregistré sur cette période",
++      "emptyPeriodDescription": "Ajoutez une transaction ou passez à un autre mois ou à tout l'historique."
+     }
+   }
+ }
+diff --git a/apps/web/src/features/money/categories/category-select.tsx b/apps/web/src/features/money/categories/category-select.tsx
 new file mode 100644
-index 0000000..57169e4
+index 0000000..e3a1aaf
 --- /dev/null
-+++ b/apps/web/src/features/money/categories/emoji-picker.tsx
-@@ -0,0 +1,66 @@
++++ b/apps/web/src/features/money/categories/category-select.tsx
+@@ -0,0 +1,68 @@
 +"use client";
 +
-+import { EmojiPicker as Picker } from "frimousse";
-+import { useLocale, useTranslations } from "next-intl";
++import type { Category } from "@lifeos/shared";
++import { Tags } from "lucide-react";
++import { OptionSelect } from "@/components/ui/select";
++import { CategoryBadge } from "./category-badge";
++import { useCategoryName } from "./use-categories";
++
++const ALL = "__all";
 +
 +/**
-+ * Searchable emoji picker (frimousse, unstyled), styled with our tokens.
-+ * Emoji data comes from the Emojibase CDN and has English and French names;
-+ * Arabic users get the English search names.
++ * Dropdown of categories with their icons. With `allLabel` the first option is
++ * "all categories" and an empty value means that option.
 + */
-+export function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
-+  const t = useTranslations("Money.categories");
-+  const locale = useLocale();
++export function CategorySelect({
++  categories,
++  value,
++  onValueChange,
++  allLabel,
++  placeholder,
++  id,
++  className,
++  ariaLabel,
++}: {
++  categories: Category[];
++  value: string;
++  onValueChange: (id: string) => void;
++  allLabel?: string;
++  placeholder?: string;
++  id?: string;
++  className?: string;
++  ariaLabel?: string;
++}) {
++  const nameOf = useCategoryName();
++
++  const options = [
++    ...(allLabel
++      ? [
++          {
++            value: ALL,
++            label: allLabel,
++            icon: (
++              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-money/15 text-money">
++                <Tags aria-hidden className="size-4" />
++              </span>
++            ),
++          },
++        ]
++      : []),
++    ...categories.map((c) => ({
++      value: c.id,
++      label: nameOf(c),
++      icon: <CategoryBadge icon={c.icon} color={c.color} className="size-8 rounded-lg" />,
++    })),
++  ];
 +
 +  return (
-+    <Picker.Root
-+      locale={locale === "fr" ? "fr" : "en"}
-+      columns={8}
-+      onEmojiSelect={({ emoji }) => onSelect(emoji)}
-+      // Enter in the search box must not submit the surrounding form.
-+      onKeyDownCapture={(e) => e.key === "Enter" && e.preventDefault()}
-+      className="flex h-72 w-full flex-col rounded-2xl border-2 border-border bg-card"
-+    >
-+      <Picker.Search
-+        autoFocus
-+        aria-label={t("emojiSearch")}
-+        placeholder={t("emojiSearch")}
-+        className="m-2 h-10 rounded-xl border-2 border-input bg-muted px-3 text-sm outline-none focus-visible:border-ring focus-visible:bg-background"
-+      />
-+      <Picker.Viewport className="min-h-0 flex-1 outline-none">
-+        <Picker.Loading className="grid h-full place-items-center text-sm text-muted-foreground">
-+          {t("emojiLoading")}
-+        </Picker.Loading>
-+        <Picker.Empty className="grid h-full place-items-center text-sm text-muted-foreground">
-+          {t("emojiEmpty")}
-+        </Picker.Empty>
-+        <Picker.List
-+          components={{
-+            CategoryHeader: ({ category, ...props }) => (
-+              <div
-+                {...props}
-+                className="bg-card px-3 pt-3 pb-1.5 text-xs font-bold text-muted-foreground"
-+              >
-+                {category.label}
-+              </div>
-+            ),
-+            Row: ({ children, ...props }) => (
-+              <div {...props} className="scroll-my-1.5 px-1.5">
-+                {children}
-+              </div>
-+            ),
-+            Emoji: ({ emoji, ...props }) => (
-+              <button
-+                {...props}
-+                type="button"
-+                className="flex size-9 items-center justify-center rounded-lg text-xl data-[active]:bg-accent"
-+              >
-+                {emoji.emoji}
-+              </button>
-+            ),
-+          }}
-+        />
-+      </Picker.Viewport>
-+    </Picker.Root>
++    <OptionSelect
++      id={id}
++      value={allLabel && value === "" ? ALL : value}
++      onValueChange={(v) => onValueChange(v === ALL ? "" : v)}
++      options={options}
++      placeholder={placeholder}
++      className={className}
++      aria-label={ariaLabel}
++    />
 +  );
 +}
-diff --git a/apps/web/src/features/money/categories/emoji-presets.ts b/apps/web/src/features/money/categories/emoji-presets.ts
-deleted file mode 100644
-index 29cd3b0..0000000
---- a/apps/web/src/features/money/categories/emoji-presets.ts
-+++ /dev/null
-@@ -1,35 +0,0 @@
--/** Quick picks for the category dialog. Any other emoji can be typed or pasted. */
--export const EMOJI_PRESETS = [
--  "🛒",
--  "🍔",
--  "☕",
--  "🍕",
--  "🚗",
--  "⛽",
--  "🏠",
--  "💡",
--  "📱",
--  "👕",
--  "🎮",
--  "🎬",
--  "✈️",
--  "🏖️",
--  "💊",
--  "🏋️",
--  "📚",
--  "🎓",
--  "👶",
--  "🐶",
--  "🎁",
--  "💼",
--  "💻",
--  "📈",
--  "💰",
--  "🏦",
--  "🧾",
--  "🔧",
--  "💇",
--  "🎵",
--  "🕌",
--  "🤲",
--] as const;
+diff --git a/apps/web/src/features/money/transactions/month-switcher.tsx b/apps/web/src/features/money/transactions/month-switcher.tsx
+new file mode 100644
+index 0000000..60821d8
+--- /dev/null
++++ b/apps/web/src/features/money/transactions/month-switcher.tsx
+@@ -0,0 +1,58 @@
++"use client";
++
++import { ChevronLeft, ChevronRight } from "lucide-react";
++import { useLocale, useTranslations } from "next-intl";
++import { Button } from "@/components/ui/button";
++import { shiftPeriod, type Period } from "./period";
++
++/** Previous / next month, plus a switch between one month and all time. */
++export function MonthSwitcher({
++  period,
++  onChange,
++  currentMonth,
++}: {
++  /** null = all time */
++  period: Period | null;
++  onChange: (period: Period | null) => void;
++  currentMonth: Period;
++}) {
++  const t = useTranslations("Money.transactions");
++  const locale = useLocale();
++
++  const label = period
++    ? new Intl.DateTimeFormat(`${locale}-u-nu-latn`, {
++        month: "long",
++        year: "numeric",
++        timeZone: "UTC",
++      }).format(new Date(Date.UTC(period.year, period.month, 1)))
++    : t("allTime");
++
++  return (
++    <div className="flex items-center gap-2">
++      <Button
++        variant="outline"
++        size="icon-sm"
++        aria-label={t("periodPrevious")}
++        disabled={!period}
++        onClick={() => period && onChange(shiftPeriod(period, -1))}
++      >
++        <ChevronLeft aria-hidden className="rtl:-scale-x-100" />
++      </Button>
++      <p aria-live="polite" className="min-w-36 text-center font-extrabold">
++        {label}
++      </p>
++      <Button
++        variant="outline"
++        size="icon-sm"
++        aria-label={t("periodNext")}
++        disabled={!period}
++        onClick={() => period && onChange(shiftPeriod(period, 1))}
++      >
++        <ChevronRight aria-hidden className="rtl:-scale-x-100" />
++      </Button>
++      <Button variant="ghost" size="sm" onClick={() => onChange(period ? null : currentMonth)}>
++        {period ? t("allTime") : t("thisMonth")}
++      </Button>
++    </div>
++  );
++}
+diff --git a/apps/web/src/features/money/transactions/period.ts b/apps/web/src/features/money/transactions/period.ts
+new file mode 100644
+index 0000000..a18fcb6
+--- /dev/null
++++ b/apps/web/src/features/money/transactions/period.ts
+@@ -0,0 +1,22 @@
++/** A calendar month. `month` is 0-11, like Date. */
++export type Period = { year: number; month: number };
++
++export function currentPeriod(now = new Date()): Period {
++  return { year: now.getFullYear(), month: now.getMonth() };
++}
++
++export function shiftPeriod({ year, month }: Period, by: number): Period {
++  const d = new Date(Date.UTC(year, month + by, 1));
++  return { year: d.getUTCFullYear(), month: d.getUTCMonth() };
++}
++
++const pad = (n: number) => String(n).padStart(2, "0");
++
++/** First and last day of the month as "YYYY-MM-DD", the format the API filters by. */
++export function periodBounds({ year, month }: Period): { from: string; to: string } {
++  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
++  return {
++    from: `${year}-${pad(month + 1)}-01`,
++    to: `${year}-${pad(month + 1)}-${pad(lastDay)}`,
++  };
++}
+diff --git a/apps/web/src/features/money/transactions/transactions-summary.tsx b/apps/web/src/features/money/transactions/transactions-summary.tsx
+new file mode 100644
+index 0000000..ea4da44
+--- /dev/null
++++ b/apps/web/src/features/money/transactions/transactions-summary.tsx
+@@ -0,0 +1,53 @@
++"use client";
++
++import type { TransactionsSummary } from "@lifeos/shared";
++import { useTranslations } from "next-intl";
++import { Amount } from "@/features/money/shared/amount";
++import { cn } from "@/lib/utils";
++
++/** Income, spending and net for the current filters, one card per currency. */
++export function TransactionsSummaryCards({ totals }: { totals: TransactionsSummary["totals"] }) {
++  const t = useTranslations("Money.transactions");
++  if (totals.length === 0) return null;
++
++  return (
++    <section aria-label={t("summaryLabel")} className="grid gap-3">
++      {totals.map((total) => (
++        <div
++          key={total.currency}
++          className="grid gap-4 rounded-3xl border-2 border-border bg-card p-5 sm:grid-cols-3"
++        >
++          <Stat label={t("summaryIncome")} className="text-income">
++            <Amount minor={total.income} currency={total.currency} />
++          </Stat>
++          <Stat label={t("summaryExpense")} className="text-expense">
++            <Amount minor={`-${total.expense}`} currency={total.currency} />
++          </Stat>
++          <Stat
++            label={t("summaryNet")}
++            className={total.net.startsWith("-") ? "text-expense" : "text-foreground"}
++          >
++            <Amount minor={total.net} currency={total.currency} />
++          </Stat>
++        </div>
++      ))}
++    </section>
++  );
++}
++
++function Stat({
++  label,
++  className,
++  children,
++}: {
++  label: string;
++  className?: string;
++  children: React.ReactNode;
++}) {
++  return (
++    <div className="grid gap-1">
++      <p className="text-sm font-bold text-muted-foreground">{label}</p>
++      <p className={cn("text-2xl font-extrabold", className)}>{children}</p>
++    </div>
++  );
++}
+diff --git a/apps/web/src/features/money/transactions/transactions-view.tsx b/apps/web/src/features/money/transactions/transactions-view.tsx
+index 823cacb..03cae5a 100644
+--- a/apps/web/src/features/money/transactions/transactions-view.tsx
++++ b/apps/web/src/features/money/transactions/transactions-view.tsx
+@@ -1,19 +1,25 @@
+ "use client";
+ 
+ import { TRANSACTION_TYPES, type Transaction, type TransactionType } from "@lifeos/shared";
+-import { Plus, ReceiptText } from "lucide-react";
++import { Plus, ReceiptText, Search, X } from "lucide-react";
+ import { useLocale, useTranslations } from "next-intl";
+ import { useMemo, useState } from "react";
+ import { Button } from "@/components/ui/button";
++import { Input } from "@/components/ui/input";
+ import { AccountSelect } from "@/features/money/accounts/account-select";
+ import { useAccounts } from "@/features/money/accounts/use-accounts";
++import { CategorySelect } from "@/features/money/categories/category-select";
+ import { useCategories } from "@/features/money/categories/use-categories";
+ import { Link } from "@/i18n/navigation";
++import { useDebounced } from "@/lib/use-debounced";
+ import { cn } from "@/lib/utils";
+ import { DeleteTransactionDialog } from "./delete-transaction-dialog";
++import { MonthSwitcher } from "./month-switcher";
++import { currentPeriod, periodBounds, type Period } from "./period";
+ import { TransactionDialog } from "./transaction-dialog";
+ import { TransactionRow } from "./transaction-row";
+-import { useTransactions } from "./use-transactions";
++import { TransactionsSummaryCards } from "./transactions-summary";
++import { useTransactions, useTransactionsSummary } from "./use-transactions";
+ 
+ export function TransactionsView() {
+   const t = useTranslations("Money.transactions");
+@@ -22,11 +28,25 @@ export function TransactionsView() {
+ 
+   const [type, setType] = useState<TransactionType | undefined>();
+   const [accountId, setAccountId] = useState("");
+-  const filters = { type, accountId: accountId || undefined };
++  const [categoryId, setCategoryId] = useState("");
++  const [search, setSearch] = useState("");
++  const q = useDebounced(search.trim());
++  const currentMonth = useMemo(() => currentPeriod(), []);
++  // null = all time
++  const [period, setPeriod] = useState<Period | null>(currentMonth);
++
++  const filters = {
++    type,
++    accountId: accountId || undefined,
++    categoryId: categoryId || undefined,
++    q: q || undefined,
++    ...(period ? periodBounds(period) : {}),
++  };
+ 
+   const accountsQuery = useAccounts();
+   const categoriesQuery = useCategories();
+   const transactionsQuery = useTransactions(filters);
++  const summaryQuery = useTransactionsSummary(filters);
+   const { data, isPending, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
+     transactionsQuery;
+ 
+@@ -58,10 +78,17 @@ export function TransactionsView() {
+     }).format(new Date(`${date}T00:00:00Z`));
+ 
+   const hasAccounts = accounts.some((a) => a.archivedAt === null);
+-  const filtered = type !== undefined || accountId !== "";
++  const filtered = type !== undefined || accountId !== "" || categoryId !== "" || search !== "";
++
++  function clearFilters() {
++    setType(undefined);
++    setAccountId("");
++    setCategoryId("");
++    setSearch("");
++  }
+ 
+   return (
+-    <div className="mx-auto grid max-w-3xl gap-6">
++    <div className="mx-auto grid max-w-4xl gap-6">
+       <div className="flex flex-wrap items-center justify-between gap-3">
+         <p className="max-w-xl text-muted-foreground">{t("description")}</p>
+         <Button onClick={() => setDialog({})} disabled={!hasAccounts}>
+@@ -81,32 +108,72 @@ export function TransactionsView() {
+       )}
+ 
+       {hasAccounts && (
+-        <div role="group" aria-label={t("filtersLabel")} className="flex flex-wrap gap-2">
+-          {[undefined, ...TRANSACTION_TYPES].map((value) => (
+-            <button
+-              key={value ?? "all"}
+-              type="button"
+-              aria-pressed={type === value}
+-              onClick={() => setType(value)}
+-              className={cn(
+-                "rounded-xl border-2 px-4 py-2 text-sm font-extrabold transition-colors",
+-                type === value
+-                  ? "border-primary bg-primary/10 text-primary"
+-                  : "border-border text-muted-foreground hover:bg-muted",
++        <>
++          <MonthSwitcher period={period} onChange={setPeriod} currentMonth={currentMonth} />
++
++          <div className="grid gap-3">
++            <div role="group" aria-label={t("filtersLabel")} className="flex flex-wrap gap-2">
++              {[undefined, ...TRANSACTION_TYPES].map((value) => (
++                <button
++                  key={value ?? "all"}
++                  type="button"
++                  aria-pressed={type === value}
++                  onClick={() => setType(value)}
++                  className={cn(
++                    "rounded-xl border-2 px-4 py-2 text-sm font-extrabold transition-colors",
++                    type === value
++                      ? "border-primary bg-primary/10 text-primary"
++                      : "border-border text-muted-foreground hover:bg-muted",
++                  )}
++                >
++                  {value ? t(`filterTypes.${value}`) : t("typeAll")}
++                </button>
++              ))}
++            </div>
++            <div className="flex flex-wrap items-center gap-2">
++              <div className="relative min-w-48 flex-1">
++                <Search
++                  aria-hidden
++                  className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
++                />
++                <Input
++                  type="search"
++                  dir="auto"
++                  autoComplete="off"
++                  aria-label={t("searchLabel")}
++                  placeholder={t("searchPlaceholder")}
++                  value={search}
++                  onChange={(e) => setSearch(e.target.value)}
++                  className="ps-9"
++                />
++              </div>
++              <AccountSelect
++                ariaLabel={t("accountFilter")}
++                className="w-auto min-w-48"
++                accounts={accounts}
++                allLabel={t("allAccounts")}
++                value={accountId}
++                onValueChange={setAccountId}
++              />
++              <CategorySelect
++                ariaLabel={t("categoryFilter")}
++                className="w-auto min-w-48"
++                categories={categories}
++                allLabel={t("allCategories")}
++                value={categoryId}
++                onValueChange={setCategoryId}
++              />
++              {filtered && (
++                <Button variant="ghost" size="sm" onClick={clearFilters}>
++                  <X aria-hidden />
++                  {t("clearFilters")}
++                </Button>
+               )}
+-            >
+-              {value ? t(`filterTypes.${value}`) : t("typeAll")}
+-            </button>
+-          ))}
+-          <AccountSelect
+-            ariaLabel={t("accountFilter")}
+-            className="ms-auto w-auto min-w-56"
+-            accounts={accounts}
+-            allLabel={t("allAccounts")}
+-            value={accountId}
+-            onValueChange={setAccountId}
+-          />
+-        </div>
++            </div>
++          </div>
++
++          <TransactionsSummaryCards totals={summaryQuery.data?.totals ?? []} />
++        </>
+       )}
+ 
+       {isPending && <p className="text-muted-foreground">{tc("loading")}</p>}
+@@ -129,6 +196,15 @@ export function TransactionsView() {
+           </span>
+           {filtered ? (
+             <p className="text-muted-foreground">{t("emptyFiltered")}</p>
++          ) : period ? (
++            <>
++              <h2 className="text-xl">{t("emptyPeriodTitle")}</h2>
++              <p className="text-muted-foreground">{t("emptyPeriodDescription")}</p>
++              <Button onClick={() => setDialog({})}>
++                <Plus aria-hidden />
++                {t("new")}
++              </Button>
++            </>
+           ) : (
+             <>
+               <h2 className="text-xl">{t("emptyTitle")}</h2>
+diff --git a/apps/web/src/features/money/transactions/use-transactions.ts b/apps/web/src/features/money/transactions/use-transactions.ts
+index 9d0b549..860ca8f 100644
+--- a/apps/web/src/features/money/transactions/use-transactions.ts
++++ b/apps/web/src/features/money/transactions/use-transactions.ts
+@@ -1,11 +1,12 @@
+ "use client";
+ 
+-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
++import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+ import type {
+   CreateTransactionInput,
+   Transaction,
+-  TransactionType,
++  TransactionFilters,
+   TransactionsResponse,
++  TransactionsSummary,
+   UpdateTransactionInput,
+ } from "@lifeos/shared";
+ import { accountsKey } from "@/features/money/accounts/use-accounts";
+@@ -13,16 +14,23 @@ import { api } from "@/lib/api";
+ 
+ export const transactionsKey = ["money", "transactions"] as const;
+ 
+-export type TransactionFilters = { type?: TransactionType; accountId?: string };
++export type { TransactionFilters };
++
++function filterParams(filters: TransactionFilters) {
++  const params = new URLSearchParams();
++  for (const [key, value] of Object.entries(filters)) {
++    if (value) params.set(key, value);
++  }
++  return params;
++}
+ 
+ export function useTransactions(filters: TransactionFilters) {
+   return useInfiniteQuery({
+-    queryKey: [...transactionsKey, filters],
++    queryKey: [...transactionsKey, "list", filters],
+     initialPageParam: undefined as string | undefined,
+     queryFn: ({ pageParam }) => {
+-      const params = new URLSearchParams({ limit: "50" });
+-      if (filters.type) params.set("type", filters.type);
+-      if (filters.accountId) params.set("accountId", filters.accountId);
++      const params = filterParams(filters);
++      params.set("limit", "50");
+       if (pageParam) params.set("cursor", pageParam);
+       return api<TransactionsResponse>(`/money/transactions?${params}`);
+     },
+@@ -30,6 +38,14 @@ export function useTransactions(filters: TransactionFilters) {
+   });
+ }
+ 
++/** Income, expense and net for the same filters, exact across all pages. */
++export function useTransactionsSummary(filters: TransactionFilters) {
++  return useQuery({
++    queryKey: [...transactionsKey, "summary", filters],
++    queryFn: () => api<TransactionsSummary>(`/money/transactions/summary?${filterParams(filters)}`),
++  });
++}
++
+ /** A transaction changes account balances too, so both lists are refetched. */
+ function useRefresh() {
+   const qc = useQueryClient();
+diff --git a/apps/web/src/lib/use-debounced.ts b/apps/web/src/lib/use-debounced.ts
+new file mode 100644
+index 0000000..a1d4b7b
+--- /dev/null
++++ b/apps/web/src/lib/use-debounced.ts
+@@ -0,0 +1,11 @@
++import { useEffect, useState } from "react";
++
++/** The value, but only after it has stopped changing for `delay` ms. */
++export function useDebounced<T>(value: T, delay = 300): T {
++  const [debounced, setDebounced] = useState(value);
++  useEffect(() => {
++    const id = setTimeout(() => setDebounced(value), delay);
++    return () => clearTimeout(id);
++  }, [value, delay]);
++  return debounced;
++}
+diff --git a/packages/shared/src/transactions.ts b/packages/shared/src/transactions.ts
+index 0583829..54673de 100644
+--- a/packages/shared/src/transactions.ts
++++ b/packages/shared/src/transactions.ts
+@@ -88,7 +88,7 @@ export const transactionIdSchema = idSchema;
+ export const TRANSACTIONS_PAGE_SIZE = 50;
+ export const MAX_TRANSACTIONS_PAGE_SIZE = 100;
+ 
+-export const listTransactionsQuerySchema = z.object({
++const filterFields = {
+   /** Matches transactions where this account is the source or the transfer destination. */
+   accountId: idSchema.optional(),
+   categoryId: idSchema.optional(),
+@@ -96,12 +96,41 @@ export const listTransactionsQuerySchema = z.object({
+   /** Inclusive. */
+   from: transactionDateSchema.optional(),
+   to: transactionDateSchema.optional(),
+-  limit: z.coerce
+-    .number()
+-    .int()
+-    .min(1)
+-    .max(MAX_TRANSACTIONS_PAGE_SIZE)
+-    .default(TRANSACTIONS_PAGE_SIZE),
+-  cursor: idSchema.optional(),
+-});
++  /** Searches the note, ignoring case. */
++  q: z.string().trim().min(1).max(100).optional(),
++};
++
++const validRange = (v: { from?: string; to?: string }) => !v.from || !v.to || v.from <= v.to;
++const rangeError = { message: "`from` must not be after `to`", path: ["to"] };
++
++/** The filters a list and its summary share. */
++export const transactionFiltersSchema = z.object(filterFields).refine(validRange, rangeError);
++export type TransactionFilters = z.output<typeof transactionFiltersSchema>;
++
++export const listTransactionsQuerySchema = z
++  .object({
++    ...filterFields,
++    limit: z.coerce
++      .number()
++      .int()
++      .min(1)
++      .max(MAX_TRANSACTIONS_PAGE_SIZE)
++      .default(TRANSACTIONS_PAGE_SIZE),
++    cursor: idSchema.optional(),
++  })
++  .refine(validRange, rangeError);
+ export type ListTransactionsQuery = z.output<typeof listTransactionsQuerySchema>;
++
++export const transactionsSummarySchema = z.object({
++  /** One entry per currency that has income or expenses. Transfers are not counted. */
++  totals: z.array(
++    z.object({
++      currency: currencySchema,
++      income: minorUnitsSchema,
++      expense: minorUnitsSchema,
++      /** income minus expense. May be negative. */
++      net: minorUnitsSchema,
++    }),
++  ),
++});
++export type TransactionsSummary = z.infer<typeof transactionsSummarySchema>;

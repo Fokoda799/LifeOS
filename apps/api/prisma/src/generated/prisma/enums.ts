@@ -36,6 +36,15 @@ export const CategoryKind = {
 export type CategoryKind = (typeof CategoryKind)[keyof typeof CategoryKind]
 
 
+export const TransactionType = {
+  income: 'income',
+  expense: 'expense',
+  transfer: 'transfer'
+} as const
+
+export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType]
+
+
 export const ToolId = {
   money: 'money',
   tasks: 'tasks',

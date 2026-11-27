@@ -64,7 +64,10 @@ export function CategoryDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Dialogs render in a portal, so data-tool has to be repeated here. */}
-      <DialogContent data-tool="money" className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+      <DialogContent
+        data-tool="money"
+        className="max-h-[90dvh] overflow-y-auto sm:max-w-lg custom-scrollbar"
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-extrabold">
             {category ? t("editTitle") : t("createTitle")}
