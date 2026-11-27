@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { accountTypeIcons } from "./account-types";
-import { Amount } from "./amount";
+import { Amount } from "../shared/amount";
 
 export function AccountCard({
   account,

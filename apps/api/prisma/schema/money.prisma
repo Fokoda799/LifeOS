@@ -1,0 +1,49 @@
+enum AccountType {
+  cash
+  bank
+  savings
+  credit_card
+  e_wallet
+}
+
+model Account {
+  id             String      @id @default(cuid())
+  userId         String
+  name           String
+  type           AccountType
+  /// ISO 4217 code. Fixed after creation.
+  currency       String
+  /// Minor units. May be negative (e.g. an existing card debt).
+  openingBalance BigInt      @default(0)
+  archivedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([userId, archivedAt])
+  @@map("accounts")
+}
+
+enum CategoryKind {
+  expense
+  income
+}
+
+model Category {
+  id         String       @id @default(cuid())
+  userId     String
+  kind       CategoryKind
+  /// Set on the user's copy of a default category (the translation key). Null for custom ones.
+  systemKey  String?
+  /// Custom name or a rename of a default. Null on an untouched default.
+  name       String?
+  icon       String
+  color      String
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  // Postgres treats NULLs as distinct, so custom categories (systemKey null) are unaffected.
+  @@unique([userId, systemKey])
+  @@index([userId, kind, archivedAt])
+  @@map("categories")
+}

@@ -9,7 +9,7 @@ import {
   type ToolId,
   type UserTool,
 } from '@lifeos/shared';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
