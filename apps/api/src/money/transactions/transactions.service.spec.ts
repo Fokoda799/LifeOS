@@ -38,6 +38,7 @@ function setup() {
   const prisma = {
     transaction: {
       findMany: vi.fn().mockResolvedValue([]),
+      groupBy: vi.fn().mockResolvedValue([]),
       findFirst: vi.fn(),
       create: vi.fn().mockImplementation(({ data }) => row(data)),
       updateMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -111,6 +112,36 @@ describe('TransactionsService', () => {
       const call = prisma.transaction.findMany.mock.calls[0][0];
       expect(call.cursor).toEqual({ id: 't2' });
       expect(call.skip).toBe(1);
+    });
+  });
+
+  describe('search and summary', () => {
+    it('searches the note without case, still scoped to the user', async () => {
+      const { prisma, service } = setup();
+      await service.list('u1', { limit: 50, q: 'milk' });
+      expect(prisma.transaction.findMany.mock.calls[0][0].where).toEqual({
+        userId: 'u1',
+        note: { contains: 'milk', mode: 'insensitive' },
+      });
+    });
+
+    it('sums income and expense with the list’s filters, never across users', async () => {
+      const { prisma, service } = setup();
+      prisma.transaction.groupBy.mockResolvedValue([
+        { currency: 'MAD', type: 'income', _sum: { amount: 10_000n } },
+        { currency: 'MAD', type: 'expense', _sum: { amount: 2_500n } },
+      ]);
+      const result = await service.summary('u1', {
+        categoryId: 'k1',
+        from: '2026-11-01',
+        to: '2026-11-30',
+      });
+      expect(result.totals).toEqual([
+        { currency: 'MAD', income: '10000', expense: '2500', net: '7500' },
+      ]);
+      const where = prisma.transaction.groupBy.mock.calls[0][0].where;
+      expect(where.AND[0]).toMatchObject({ userId: 'u1', categoryId: 'k1' });
+      expect(where.AND[1]).toEqual({ type: { in: ['income', 'expense'] } });
     });
   });
 

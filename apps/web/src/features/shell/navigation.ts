@@ -39,7 +39,7 @@ export const toolNav: Partial<Record<ToolId, readonly NavItem[]>> = {
     { key: "overview", href: "/money", icon: Wallet, enabled: true },
     { key: "accounts", href: "/money/accounts", icon: Landmark, enabled: true },
     { key: "categories", href: "/money/categories", icon: Tags, enabled: true },
-    { key: "transactions", href: "/money/transactions", icon: ArrowLeftRight, enabled: false },
+    { key: "transactions", href: "/money/transactions", icon: ArrowLeftRight, enabled: true },
     { key: "budgets", href: "/money/budgets", icon: PiggyBank, enabled: false },
     { key: "goals", href: "/money/goals", icon: Target, enabled: false },
     { key: "reports", href: "/money/reports", icon: TrendingUp, enabled: false },

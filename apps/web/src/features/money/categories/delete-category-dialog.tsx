@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ApiRequestError } from "@/lib/api";
 import { useCategoryName, useDeleteCategory } from "./use-categories";
 
 export function DeleteCategoryDialog({
@@ -48,7 +49,12 @@ export function DeleteCategoryDialog({
                     toast.success(t("toastDeleted", { name: nameOf(category) }));
                     onOpenChange(false);
                   },
-                  onError: () => toast.error(t("errorDelete")),
+                  onError: (error) =>
+                    toast.error(
+                      error instanceof ApiRequestError && error.status === 409
+                        ? t("errorHasTransactions")
+                        : t("errorDelete"),
+                    ),
                 })
               }
             >

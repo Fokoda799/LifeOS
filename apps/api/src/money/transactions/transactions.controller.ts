@@ -18,6 +18,9 @@ import {
 import {
   createTransactionSchema,
   listTransactionsQuerySchema,
+  transactionFiltersSchema,
+  transactionsSummarySchema,
+  type TransactionFilters,
   transactionIdSchema,
   transactionSchema,
   transactionsResponseSchema,
@@ -70,6 +73,27 @@ export class TransactionsController {
     query: ListTransactionsQuery,
   ) {
     return this.transactions.list(user.id, query);
+  }
+
+  @Get('summary')
+  @ApiQuery({ name: 'accountId', required: false })
+  @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: ['income', 'expense', 'transfer'],
+  })
+  @ApiQuery({ name: 'from', required: false, description: 'YYYY-MM-DD' })
+  @ApiQuery({ name: 'to', required: false, description: 'YYYY-MM-DD' })
+  @ApiQuery({ name: 'q', required: false, description: 'Search the note' })
+  @ZodResponse(200, transactionsSummarySchema)
+  @ApiErrors(400, 401, 403)
+  summary(
+    @CurrentUser() user: { id: string },
+    @Query(new ZodValidationPipe(transactionFiltersSchema))
+    query: TransactionFilters,
+  ) {
+    return this.transactions.summary(user.id, query);
   }
 
   @Post()

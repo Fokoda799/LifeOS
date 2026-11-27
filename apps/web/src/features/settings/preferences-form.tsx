@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Label } from "@/components/ui/label";
+import { OptionSelect } from "@/components/ui/select";
 import { useMe } from "@/features/auth/use-auth";
 import type { UpdateProfileInput } from "@lifeos/shared";
 import { useUpdateProfile } from "./use-update-profile";
@@ -32,19 +33,13 @@ export function PreferencesForm() {
       </div>
       <div className="grid gap-2">
         <Label htmlFor="currency">{t("currency")}</Label>
-        <select
+        <OptionSelect
           id="currency"
           value={user?.currency ?? "MAD"}
           disabled={update.isPending}
-          onChange={(e) => save({ currency: e.target.value })}
-          className="h-11 w-full rounded-xl border-2 border-input bg-muted px-4 text-base font-bold outline-none focus-visible:border-ring focus-visible:bg-background disabled:opacity-50"
-        >
-          {CURRENCIES.map((c) => (
-            <option key={c} value={c}>
-              {c} · {names.of(c)}
-            </option>
-          ))}
-        </select>
+          onValueChange={(currency) => save({ currency })}
+          options={CURRENCIES.map((c) => ({ value: c, label: c, description: names.of(c) }))}
+        />
         <p className="text-sm text-muted-foreground">{t("currencyHint")}</p>
       </div>
     </div>

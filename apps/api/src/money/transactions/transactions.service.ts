@@ -7,12 +7,15 @@ import {
 import type {
   CreateTransactionInput,
   ListTransactionsQuery,
+  TransactionFilters,
+  TransactionsSummary,
   Transaction,
   TransactionsResponse,
   TransactionType,
   UpdateTransactionInput,
 } from '@lifeos/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { summarize } from './summary';
 import { toDbDate, toTransactionDto } from './transactions.mapper';
 
 type Refs = {
@@ -31,20 +34,7 @@ export class TransactionsService {
     q: ListTransactionsQuery,
   ): Promise<TransactionsResponse> {
     const rows = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        ...(q.type && { type: q.type }),
-        ...(q.categoryId && { categoryId: q.categoryId }),
-        ...(q.accountId && {
-          OR: [{ accountId: q.accountId }, { toAccountId: q.accountId }],
-        }),
-        ...((q.from || q.to) && {
-          date: {
-            ...(q.from && { gte: toDbDate(q.from) }),
-            ...(q.to && { lte: toDbDate(q.to) }),
-          },
-        }),
-      },
+      where: this.where(userId, q),
       orderBy: [{ date: 'desc' }, { createdAt: 'desc' }, { id: 'desc' }],
       take: q.limit + 1,
       ...(q.cursor && { cursor: { id: q.cursor }, skip: 1 }),
@@ -53,6 +43,38 @@ export class TransactionsService {
     return {
       transactions: page.map(toTransactionDto),
       nextCursor: rows.length > q.limit ? page[page.length - 1].id : null,
+    };
+  }
+
+  /** Income, expense and net for the same filters as the list (transfers excluded). */
+  async summary(
+    userId: string,
+    filters: TransactionFilters,
+  ): Promise<TransactionsSummary> {
+    const rows = await this.prisma.transaction.groupBy({
+      by: ['currency', 'type'],
+      where: {
+        AND: [
+          this.where(userId, filters),
+          { type: { in: ['income', 'expense'] } },
+        ],
+      },
+      _sum: { amount: true },
+    });
+    return {
+      totals: summarize(
+        rows.map(
+          (r: {
+            currency: string;
+            type: 'income' | 'expense' | 'transfer';
+            _sum: { amount: bigint | null };
+          }) => ({
+            currency: r.currency,
+            type: r.type,
+            sum: r._sum.amount ?? 0n,
+          }),
+        ),
+      ),
     };
   }
 
@@ -117,6 +139,25 @@ export class TransactionsService {
       where: { id, userId },
     });
     if (count === 0) throw new NotFoundException('Transaction not found');
+  }
+
+  /** The user's own transactions, narrowed by the optional filters. */
+  private where(userId: string, f: TransactionFilters) {
+    return {
+      userId,
+      ...(f.type && { type: f.type }),
+      ...(f.categoryId && { categoryId: f.categoryId }),
+      ...(f.accountId && {
+        OR: [{ accountId: f.accountId }, { toAccountId: f.accountId }],
+      }),
+      ...((f.from || f.to) && {
+        date: {
+          ...(f.from && { gte: toDbDate(f.from) }),
+          ...(f.to && { lte: toDbDate(f.to) }),
+        },
+      }),
+      ...(f.q && { note: { contains: f.q, mode: 'insensitive' as const } }),
+    };
   }
 
   /** Used by the data-deletion job. Runs before accounts and categories are erased. */
